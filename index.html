@@ -230,13 +230,15 @@ tbody tr:hover .add-pal{display:inline-block}
 <div class="controls">
   <input class="srch" id="srch" type="text" placeholder="Search colour, place, hex&#x2026;" oninput="go()">
   <div class="div"></div>
+  <span>Filter by:</span>
   <span class="chip on" id="chip-" onclick="setcat('')">All</span>
   <span class="chip" id="chip-city" onclick="setcat('city')">City / Town</span>
   <span class="chip" id="chip-region" onclick="setcat('region')">Region</span>
   <span class="chip" id="chip-country" onclick="setcat('country')">Country / Empire</span>
   <span class="chip" id="chip-water" onclick="setcat('water')">Water Body</span>
   <span class="chip" id="chip-landform" onclick="setcat('landform')">Landform</span>
-  <div class="div">| Sort by: </div>
+  <div class="div"></div>
+  <span>Sort by:</span>
   <span class="chip" id="chip-hue" onclick="setSrt('h',1)">Hue</span>
   <span class="chip" id="chip-sat" onclick="setSrt('s',-1)">Saturation</span>
   <span class="chip" id="chip-val" onclick="setSrt('v',-1)">Brightness</span>
