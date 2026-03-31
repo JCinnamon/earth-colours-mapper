@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Colours of the World — A Geographic Colour Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+:root{
+  --bg:#F7F3EB;--surface:#FFFFFF;--ink:#1C140A;--ink-mid:#5A4830;
+  --ink-light:#9B855E;--rust:#8B3A1F;--gold:#B8821A;
+  --border:rgba(90,72,48,0.18);--border-strong:rgba(90,72,48,0.36);
+  --hh:54px;--ch:44px;--fh:36px;
+}
+[data-theme="dark"]{
+  --bg:#181410;--surface:#231D14;--ink:#F0E8D8;--ink-mid:#B09060;
+  --ink-light:#6A5838;--rust:#D06030;--gold:#D4A030;
+  --border:rgba(200,160,80,0.14);--border-strong:rgba(200,160,80,0.28);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Crimson Pro',Georgia,serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;transition:background .2s,color .2s}
+
+/* ── HEADER ── */
+header{height:var(--hh);flex-shrink:0;padding:0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-strong);background:var(--bg);position:relative;z-index:300}
+.h-left{display:flex;align-items:baseline;gap:12px}
+header h1{font-family:'IM Fell English SC',serif;font-size:18px;font-weight:400;letter-spacing:.02em;color:var(--ink)}
+.h-tag{font-size:14px;color:var(--ink-mid);font-style:italic}
+.h-right{display:flex;align-items:center;gap:6px}
+.btn{background:none;border:.5px solid var(--border-strong);border-radius:4px;color:var(--ink-mid);cursor:pointer;font-size:13px;padding:4px 9px;font-family:'Crimson Pro',serif;transition:all .12s;white-space:nowrap}
+.btn:hover{color:var(--rust);border-color:var(--rust)}
+.btn.active{background:var(--rust);color:#fff;border-color:var(--rust)}
+
+/* ── CONTROLS BAR ── */
+.controls{height:var(--ch);flex-shrink:0;padding:0 14px;display:flex;align-items:center;gap:6px;flex-wrap:nowrap;overflow-x:auto;border-bottom:.5px solid var(--border);background:var(--bg);position:relative;z-index:299}
+.controls::-webkit-scrollbar{display:none}
+.srch{padding:4px 10px;font-size:13px;font-family:'Crimson Pro',serif;border:.5px solid var(--border-strong);border-radius:3px;background:var(--surface);color:var(--ink);width:176px;outline:none;flex-shrink:0}
+.srch:focus{border-color:var(--rust)}
+.div{width:.5px;height:15px;background:var(--border);flex-shrink:0}
+.chip{padding:2px 9px;font-size:13px;font-family:'Crimson Pro',serif;border:.5px solid var(--border-strong);border-radius:20px;background:transparent;color:var(--ink-mid);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .12s}
+.chip:hover{background:rgba(139,58,31,.07);color:var(--rust);border-color:rgba(139,58,31,.4)}
+.chip.on{background:var(--rust);color:#fff;border-color:var(--rust)}
+
+/* ── MAIN LAYOUT ── */
+.main{flex:1;display:flex;min-height:0;overflow:hidden}
+.map-pane{flex-shrink:0;border-right:none;position:relative;min-width:18%;max-width:82%}
+#map{width:100%;height:100%}
+
+/* ── DRAG HANDLE ── */
+.drag-handle{width:6px;flex-shrink:0;cursor:col-resize;background:var(--border);transition:background .15s;z-index:10;position:relative}
+.drag-handle::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:2px;height:32px;border-radius:1px;background:var(--border-strong);transition:background .15s}
+.drag-handle:hover,.drag-handle.dragging{background:rgba(139,58,31,.12)}
+.drag-handle:hover::after,.drag-handle.dragging::after{background:var(--rust)}
+
+/* ── TABLE PANE ── */
+.tpane{flex:1;overflow-y:auto;min-width:0;min-height:0}
+table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+col.c-sw{width:32px}col.c-nm{width:148px}col.c-hx{width:70px}col.c-pl{width:auto}col.c-tp{width:104px}col.c-la{width:57px}col.c-lo{width:61px}col.c-h{width:55px}col.c-s{width:52px}col.c-v{width:52px}
+thead{position:sticky;top:0;z-index:10;background:var(--bg)}
+th{padding:6px 7px;font-family:'Crimson Pro',serif;font-size:10px;font-weight:400;font-style:italic;color:var(--ink-mid);border-bottom:1px solid var(--border-strong);text-align:left;white-space:nowrap;cursor:pointer;user-select:none;overflow:hidden;transition:color .1s}
+th:hover{color:var(--rust)}
+.si{opacity:.7;font-style:normal;font-size:9px}
+tbody tr{border-bottom:.5px solid var(--border);cursor:pointer;transition:background .07s}
+tbody tr:hover{background:rgba(90,72,48,.04)}
+[data-theme="dark"] tbody tr:hover{background:rgba(200,160,80,.06)}
+tbody tr.sel{background:rgba(139,58,31,.08);border-left:2.5px solid var(--rust)}
+tbody tr.sel td:first-child{padding-left:5.5px}
+td{padding:4px 7px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis}
+.sw{width:19px;height:19px;border-radius:3px;border:.5px solid rgba(0,0,0,.12);display:inline-block;vertical-align:middle}
+.cn{font-weight:600;color:var(--ink);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.hx{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-light);display:block}
+.pl{color:var(--ink);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.cx{color:var(--ink-light);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;margin-top:1px}
+.co{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-light);text-align:right;white-space:nowrap}
+.nm{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink);text-align:right;display:block}
+.hd{width:9px;height:9px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:3px;border:.5px solid rgba(0,0,0,.18)}
+.bar{height:3px;border-radius:2px;background:var(--border);margin-top:2px;overflow:hidden}
+.bf{height:100%;border-radius:2px}
+.badge{font-size:9.5px;padding:2px 7px;border-radius:20px;font-weight:400;font-family:'Crimson Pro',serif;white-space:nowrap;display:inline-block;border:.5px solid transparent}
+.b-city{background:#FEF3E2;color:#7A4100;border-color:#F0C060}
+.b-region{background:#EAF3DE;color:#275010;border-color:#9EC45B}
+.b-country{background:#EDF0FC;color:#2D3A8C;border-color:#9BA8E8}
+.b-water{background:#E0F4F0;color:#0A5046;border-color:#5EC6AD}
+.b-landform{background:#FDF0E0;color:#5E3000;border-color:#D4A055}
+[data-theme="dark"] .b-city{background:#3A2200;color:#F0C060;border-color:#7A5020}
+[data-theme="dark"] .b-region{background:#1A2800;color:#9EC45B;border-color:#3A5020}
+[data-theme="dark"] .b-country{background:#0E1430;color:#9BA8E8;border-color:#2D3A8C}
+[data-theme="dark"] .b-water{background:#042018;color:#5EC6AD;border-color:#0A5046}
+[data-theme="dark"] .b-landform{background:#1E0E00;color:#D4A055;border-color:#5E3000}
+.add-pal{display:none;width:15px;height:15px;border-radius:3px;border:.5px solid var(--border-strong);background:transparent;color:var(--ink-light);font-size:10px;line-height:15px;text-align:center;cursor:pointer;flex-shrink:0;padding:0;vertical-align:middle;margin-left:3px;font-family:'JetBrains Mono',monospace;transition:all .1s}
+.add-pal:hover{color:var(--rust);border-color:var(--rust);background:rgba(139,58,31,.07)}
+tbody tr:hover .add-pal{display:inline-block}
+
+/* ── MAP INFO CONTROL ── */
+.map-info{background:var(--surface);border-radius:5px;border:.5px solid var(--border-strong);min-width:170px;max-width:210px;overflow:hidden;font-family:'Crimson Pro',Georgia,serif}
+.mi-swatch{height:80px;width:100%;display:flex;align-items:flex-end;text-decoration:none;transition:opacity .15s;position:relative}
+.mi-swatch:hover{opacity:.88}
+.mi-label{padding:5px 8px;background:rgba(0,0,0,.3);width:100%;backdrop-filter:blur(2px)}
+.mi-name{font-family:'IM Fell English SC',serif;font-size:12px;color:#fff;line-height:1.2;letter-spacing:.01em}
+.mi-code{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.75);margin-top:1px}
+.mi-body{padding:5px 8px 6px}
+.mi-hsv{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink-light)}
+.mi-add{display:block;width:100%;margin-top:4px;padding:3px 0;font-size:10.5px;font-family:'Crimson Pro',serif;border:.5px solid var(--border-strong);border-radius:3px;background:transparent;color:var(--ink-mid);cursor:pointer;transition:all .12s;text-align:center}
+.mi-add:hover{color:var(--rust);border-color:var(--rust)}
+.mi-add:disabled{opacity:.35;cursor:default;pointer-events:none}
+.mi-empty{padding:9px 10px;font-size:11px;color:var(--ink-light);font-style:italic;text-align:center}
+
+/* ── LEAFLET OVERRIDES ── */
+.leaflet-popup-content-wrapper{border-radius:4px!important;border:.5px solid var(--border-strong)!important;font-family:'Crimson Pro',serif!important;background:var(--surface)!important;color:var(--ink)!important}
+.leaflet-popup-tip{background:var(--surface)!important}
+.lp{min-width:178px;padding:2px 0}
+.lp-head{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.lp-sw{width:26px;height:26px;border-radius:4px;border:.5px solid rgba(0,0,0,.14);flex-shrink:0}
+.lp-nm{font-size:13px;font-weight:600;line-height:1.2}
+.lp-pl{font-size:11px;color:var(--ink-mid);line-height:1.4;margin-bottom:3px}
+.lp-hsv{font-size:9.5px;color:var(--ink-light);font-family:'JetBrains Mono',monospace}
+.leaflet-tooltip{font-family:'Crimson Pro',serif!important;font-size:12px!important;border:.5px solid var(--border-strong)!important;border-radius:3px!important;color:var(--ink)!important;background:var(--bg)!important}
+.leaflet-control-container .leaflet-bottom.leaflet-left{bottom:6px}
+
+/* ── PALETTE TRAY ── */
+.pal-tray{flex-shrink:0;border-top:1px solid var(--border-strong);background:var(--bg);overflow:hidden;max-height:0;transition:max-height .3s ease}
+.pal-tray.open{max-height:150px}
+.pal-tray-inner{display:flex;flex-direction:column;height:150px;padding:7px 16px 5px}
+.pal-chips-row{flex:1;display:flex;align-items:center;gap:7px;overflow-x:auto;min-width:0;padding-bottom:2px}
+.pal-chips-row::-webkit-scrollbar{height:2px}
+.pal-chips-row::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:1px}
+.pal-empty-msg{font-size:13px;color:var(--ink-light);font-style:italic;white-space:nowrap}
+.pal-sort-row{display:flex;align-items:center;gap:5px;flex-shrink:0;padding:3px 0;border-top:.5px solid var(--border);border-bottom:.5px solid var(--border)}
+.pal-sort-label{font-size:12px;color:var(--ink-mid);font-style:italic;white-space:nowrap;flex-shrink:0;margin-right:1px}
+.pal-sort-btn{padding:1px 8px;font-size:12px;font-family:'Crimson Pro',serif;border:.5px solid var(--border-strong);border-radius:20px;background:transparent;color:var(--ink-mid);cursor:pointer;transition:all .12s;white-space:nowrap;flex-shrink:0}
+.pal-sort-btn:hover{color:var(--rust);border-color:rgba(139,58,31,.4)}
+.pal-sort-btn.on{background:rgba(139,58,31,.1);color:var(--rust);border-color:var(--rust);font-weight:500}
+.pal-drag-hint{font-size:12px;color:var(--ink-light);font-style:italic;white-space:nowrap;flex-shrink:0;opacity:.7}
+.pal-actions-row{display:flex;align-items:center;gap:5px;flex-shrink:0;padding-top:3px}
+.pal-count{font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--ink-light);white-space:nowrap;margin-right:2px}
+.pal-warn{font-size:12px;color:var(--rust);font-style:italic;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.pal-btn{padding:2px 8px;font-size:12px;font-family:'Crimson Pro',serif;border:.5px solid var(--border-strong);border-radius:4px;background:transparent;color:var(--ink-mid);cursor:pointer;transition:all .12s;white-space:nowrap;flex-shrink:0}
+.pal-btn:hover{color:var(--rust);border-color:var(--rust)}
+.pal-btn.primary{background:var(--rust);color:#fff;border-color:var(--rust)}
+.pal-btn.primary:hover{opacity:.88}
+.pal-btn:disabled{opacity:.35;cursor:default;pointer-events:none}
+.pal-grip{font-size:9px;color:rgba(128,128,128,.5);cursor:grab;line-height:1;margin-bottom:2px;user-select:none}
+.pal-grip:active{cursor:grabbing}
+.pal-chip-drop-left{border-left:2px solid var(--rust)!important}
+.pal-chip-drop-right{border-right:2px solid var(--rust)!important}
+
+/* ── CREDITS DRAWER ── */
+.credits-drawer{flex-shrink:0;overflow:hidden;max-height:0;transition:max-height .32s ease;border-top:none;background:var(--bg)}
+.credits-drawer.open{max-height:260px;border-top:1px solid var(--border-strong)}
+.credits-inner{padding:16px 20px 14px;display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:1100px}
+.cr-title{font-family:'IM Fell English SC',serif;font-size:13px;font-weight:400;color:var(--rust);letter-spacing:.05em;margin-bottom:6px}
+.cr-text{font-size:13px;color:var(--ink-mid);line-height:1.7}
+.cr-text em{font-style:italic}
+.cr-attr{margin-top:8px;padding-top:7px;border-top:.5px solid var(--border);font-size:12px;color:var(--ink-light);font-style:italic}
+.cr-attr a{color:var(--ink-mid);text-decoration:none;border-bottom:.5px solid var(--border-strong)}
+.cr-attr a:hover{color:var(--rust);border-color:var(--rust)}
+
+/* ── SLIM FOOTER BAR ── */
+.footer-bar{height:var(--fh);flex-shrink:0;border-top:1px solid var(--border-strong);background:var(--bg);padding:0 16px;display:flex;align-items:center;gap:10px;z-index:200}
+.fb-stats{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.fb-stat{font-size:12px;color:var(--ink-light);font-family:'JetBrains Mono',monospace;white-space:nowrap}
+.fb-stat b{color:var(--rust);font-weight:500}
+.fb-sep{width:.5px;height:12px;background:var(--border);flex-shrink:0}
+.fb-spacer{flex:1}
+.fb-cred{font-size:13px;color:var(--ink-mid);cursor:pointer;border:none;background:none;font-family:'Crimson Pro',serif;font-style:italic;padding:0;transition:color .12s;white-space:nowrap}
+.fb-cred:hover{color:var(--rust)}
+.fb-cred.open{color:var(--rust)}
+.fb-attr{font-size:12px;color:var(--ink-light);font-style:italic;white-space:nowrap}
+.fb-attr a{color:var(--ink-mid);text-decoration:none;border-bottom:.5px solid var(--border)}
+.fb-attr a:hover{color:var(--rust)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:820px){
+  html,body{overflow:auto}
+  .main{flex-direction:column;overflow:visible}
+  .map-pane{width:100%!important;height:42vh;flex-shrink:0}
+  .drag-handle{display:none}
+  .tpane{overflow-y:visible;height:auto}
+  .credits-inner{grid-template-columns:1fr}
+  .h-tag{display:none}
+  table{table-layout:auto}
+  body{overflow:auto}
+}
+
+/* ── PRINT ── */
+@media print{
+  *{transition:none!important;overflow:visible!important}
+  html,body{overflow:visible;height:auto}
+  .h-right,.controls,.map-pane,.drag-handle,.pal-tray,.footer-bar{display:none!important}
+  .credits-drawer{max-height:none!important;border-top:none;display:block}
+  .credits-inner{display:block;padding:8pt 0 0}
+  .cr-title{font-size:8pt;color:#333!important}
+  .cr-text{font-size:7pt;color:#555!important;line-height:1.5}
+  .cr-attr{font-size:7pt;color:#888!important}
+  header{position:static;border-bottom:1pt solid #555;height:auto;padding:6pt 0}
+  .main{display:block;height:auto}
+  .tpane{overflow:visible;height:auto;min-height:0}
+  table{font-size:7.5pt;page-break-inside:auto}
+  tr{page-break-inside:avoid}
+  thead{display:table-header-group}
+  th{background:#f0f0f0!important;color:#444!important;border-bottom:.5pt solid #999!important;font-size:7pt!important}
+  tbody tr{border-bottom:.25pt solid #ccc!important}
+  tbody tr:hover,tbody tr.sel{background:transparent!important;border-left:none!important}
+  .sw,.bf,.hd,.badge{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .badge{background:#eee!important;color:#333!important;border:.25pt solid #aaa!important}
+  .hx,.cx,.co,.nm{color:#555!important}
+  @page{margin:1.4cm;size:A4 landscape}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-left">
+    <h1>Colours of the World</h1>
+    <span class="h-tag">A geographic colour atlas</span>
+  </div>
+  <div class="h-right">
+    <span style="font-size:12px;color:var(--ink-light);font-family:'JetBrains Mono',monospace;margin-right:3px" id="hcnt"></span>
+    <button class="btn" id="palBtn" onclick="togglePalette()">&#x25A3; Create Earth Palette</button>
+    <button class="btn" onclick="exportCSV()" title="Export current view as CSV">&#x2193; CSV</button>
+    <button class="btn" onclick="toggleTheme()" id="themeBtn">&#x25D1; Dark</button>
+    <button class="btn" onclick="window.print()">&#x2399; Print</button>
+  </div>
+</header>
+
+<div class="controls">
+  <input class="srch" id="srch" type="text" placeholder="Search colour, place, hex&#x2026;" oninput="go()">
+  <div class="div"></div>
+  <span class="chip on" id="chip-" onclick="setcat('')">All</span>
+  <span class="chip" id="chip-city" onclick="setcat('city')">City / Town</span>
+  <span class="chip" id="chip-region" onclick="setcat('region')">Region</span>
+  <span class="chip" id="chip-country" onclick="setcat('country')">Country / Empire</span>
+  <span class="chip" id="chip-water" onclick="setcat('water')">Water Body</span>
+  <span class="chip" id="chip-landform" onclick="setcat('landform')">Landform</span>
+  <div class="div"></div>
+  <span class="chip" id="chip-hue" onclick="setSrt('h',1)">By hue</span>
+  <span class="chip" id="chip-sat" onclick="setSrt('s',-1)">Saturation</span>
+  <span class="chip" id="chip-val" onclick="setSrt('v',-1)">Brightness</span>
+  <span class="chip" id="chip-la" onclick="setSrt('la',1)">N&#x2192;S</span>
+  <span class="chip" id="chip-lo" onclick="setSrt('lo',1)">W&#x2192;E</span>
+</div>
+
+<div class="main" id="mainPane">
+  <div class="map-pane" id="mapPane"><div id="map"></div></div>
+  <div class="drag-handle" id="dragHandle" title="Drag to resize"></div>
+  <div class="tpane" id="tpane">
+    <table>
+      <colgroup><col class="c-sw"><col class="c-nm"><col class="c-hx"><col class="c-pl"><col class="c-tp"><col class="c-la"><col class="c-lo"><col class="c-h"><col class="c-s"><col class="c-v"></colgroup>
+      <thead><tr>
+        <th></th>
+        <th onclick="setSrt('n',1)">Colour name <span class="si" id="si-n"></span></th>
+        <th onclick="setSrt('hx',1)">Hex <span class="si" id="si-hx"></span></th>
+        <th onclick="setSrt('pl',1)">Place / context <span class="si" id="si-pl"></span></th>
+        <th onclick="setSrt('cat',1)">Type <span class="si" id="si-cat"></span></th>
+        <th onclick="setSrt('la',1)" style="text-align:right">Lat <span class="si" id="si-la"></span></th>
+        <th onclick="setSrt('lo',1)" style="text-align:right">Lng <span class="si" id="si-lo"></span></th>
+        <th onclick="setSrt('h',1)" style="text-align:right" title="Hue 0-360">H&#xB0; <span class="si" id="si-h"></span></th>
+        <th onclick="setSrt('s',-1)" title="Saturation">S% <span class="si" id="si-s"></span></th>
+        <th onclick="setSrt('v',-1)" title="Brightness">V% <span class="si" id="si-v"></span></th>
+      </tr></thead>
+      <tbody id="tb"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PALETTE TRAY -->
+<div class="pal-tray" id="palTray">
+  <div class="pal-tray-inner">
+    <div class="pal-chips-row" id="palChips">
+      <span class="pal-empty-msg" id="palEmpty">No colours added yet — hover any table row and click + to add</span>
+    </div>
+    <div class="pal-sort-row">
+      <span class="pal-drag-hint">&#x2195; drag to reorder</span>
+      <span class="pal-sort-label">Sort colours:</span>
+      <button class="pal-sort-btn" id="psb-h" onclick="sortPalette('h')">Hue</button>
+      <button class="pal-sort-btn" id="psb-s" onclick="sortPalette('s')">Saturation</button>
+      <button class="pal-sort-btn" id="psb-v" onclick="sortPalette('v')">Brightness</button>
+      <button class="pal-sort-btn" id="psb-lum" onclick="sortPalette('lum')">Luminance</button>
+    </div>
+    <div class="pal-actions-row">
+      <span class="pal-count" id="palCount"></span>
+      <span class="pal-warn" id="palWarn"></span>
+      <button class="pal-btn" onclick="clearPalette()">Clear</button>
+      <button class="pal-btn" onclick="exportPaletteCSV()" id="palCSVBtn" disabled>&#x2193; CSV</button>
+      <button class="pal-btn" onclick="downloadPNG()" id="palPNGBtn" disabled>&#x2193; PNG strip</button>
+      <button class="pal-btn primary" id="palTinBtn" onclick="openTineye()" disabled>Palette image search with TinEye MultiColr &#x2197;</button>
+    </div>
+  </div>
+</div>
+
+<!-- CREDITS DRAWER -->
+<div class="credits-drawer" id="creditsDrawer">
+  <div class="credits-inner">
+    <div>
+      <div class="cr-title">Sources</div>
+      <p class="cr-text">Colour names and hex values are compiled from <em>A Dictionary of Color</em> by Maerz &amp; Paul (McGraw-Hill, 1930); <em>Methuen Handbook of Colour</em> by Kornerup &amp; Wanscher (3rd ed., 1978); <em>Color Standards and Color Nomenclature</em> by Robert Ridgway (1912); Winsor &amp; Newton historical pigment catalogues; Werner&#x2019;s <em>Nomenclature of Colours</em> (1814); the W3C CSS Color Module Level 4 specification; and the broader art-historical literature on named pigments and dyes. Geographic coordinates are approximate centroids from OpenStreetMap / Natural Earth.</p>
+    </div>
+    <div>
+      <div class="cr-title">Methodology &amp; notes</div>
+      <p class="cr-text">Hex values are representative sRGB approximations &#x2014; historical pigments exist in varied formulations and the values here reflect common modern reference renderings, not a single authoritative standard. Archaic, trade, and colonial-era designations carry historical and cultural complexity; their inclusion is documentary, not an endorsement of the naming conventions of any period. HSV values are computed from the hex representations. Some geographic locations appear more than once where distinct pigment formulations are documented.</p>
+      <div class="cr-attr">Created by <a href="https://jcinnamon.github.io/" target="_blank" rel="noopener">J Cinnamon</a> (<a href="https://ccgs.ok.ubc.ca/about/contact/jonathan-cinnamon/" target="_blank" rel="noopener">UBC CCGS</a>), 2026.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIM FOOTER BAR -->
+<div class="footer-bar">
+  <div class="fb-stats" id="fbStats"></div>
+  <div class="fb-spacer"></div>
+  <button class="fb-cred" id="credBtn" onclick="toggleCredits()">Credits &amp; methodology &#x25BE;</button>
+  <div class="fb-sep"></div>
+  <span class="fb-attr">Created by <a href="https://jcinnamon.github.io/" target="_blank" rel="noopener">J Cinnamon</a> &middot; <a href="https://ccgs.ok.ubc.ca/about/contact/jonathan-cinnamon/" target="_blank" rel="noopener">UBC CCGS</a> &middot; 2026</span>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const RAW=[
+["Venetian Red","#C80815","Venice","Veneto, Italy","city",45.44,12.33],
+["Venetian Green","#00827F","Venice","Veneto, Italy","city",45.46,12.35],
+["Venetian Lake","#8A3030","Venice","Veneto, Italy","city",45.42,12.31],
+["Sienna","#A0522D","Siena","Tuscany, Italy","city",43.32,11.33],
+["Burnt Sienna","#E97451","Siena","Tuscany, Italy","city",43.34,11.35],
+["Naples Yellow","#FADA5E","Naples (Napoli)","Campania, Italy","city",40.85,14.27],
+["Magenta","#FF00FF","Magenta","Lombardy, Italy","city",45.46,8.88],
+["Pompeian Red","#B22222","Pompeii","Campania, Italy","city",40.75,14.49],
+["Capri Blue","#00BFFF","Capri","Campania, Italy","city",40.55,14.24],
+["Pozzuoli Red","#CF3721","Pozzuoli","Campania, Italy","city",40.82,14.12],
+["Florentine","#C4A263","Florence (Firenze)","Tuscany, Italy","city",43.77,11.26],
+["Tyrian Purple","#66023C","Tyre (Sur)","Lebanon","city",33.27,35.20],
+["Oxford Blue","#002147","Oxford","England, UK","city",51.75,-1.26],
+["Cambridge Blue","#A3C1AD","Cambridge","England, UK","city",52.20,0.12],
+["Eton Blue","#96C8A2","Eton","England, UK","city",51.49,-0.61],
+["Lincoln Green","#195905","Lincoln","England, UK","city",53.23,-0.54],
+["Windsor Tan","#A75502","Windsor","England, UK","city",51.48,-0.63],
+["Kendal Green","#3C6B2A","Kendal","Cumbria, England","city",54.32,-2.74],
+["Chelsea Green","#4A7C59","Chelsea","London, England","city",51.49,-0.17],
+["Brunswick Green","#1B4D3E","Brunswick (Braunschweig)","Lower Saxony, Germany","city",52.27,10.52],
+["Cologne Earth","#4E3012","Cologne (Koln)","NRW, Germany","city",50.94,6.96],
+["Dresden Blue","#3F72AF","Dresden","Saxony, Germany","city",51.05,13.74],
+["Antwerp Blue","#3D70A9","Antwerp (Antwerpen)","Flanders, Belgium","city",51.22,4.40],
+["Delft Blue","#003E5C","Delft","South Holland, Netherlands","city",52.01,4.36],
+["Bordeaux","#5C0120","Bordeaux","Nouvelle-Aquitaine, France","city",44.84,-0.58],
+["Paris Green","#50C878","Paris","Ile-de-France, France","city",48.85,2.35],
+["Sevres Blue","#5E8EB1","Sevres","Ile-de-France, France","city",48.82,2.22],
+["Cordovan","#893F45","Cordoba","Andalusia, Spain","city",37.89,-4.78],
+["Seville Orange","#F57622","Seville (Sevilla)","Andalusia, Spain","city",37.39,-5.99],
+["Granada Red","#8B1818","Granada","Andalusia, Spain","city",37.18,-3.60],
+["Bruges Blue","#2E4A7A","Bruges (Brugge)","Flanders, Belgium","city",51.21,3.22],
+["Smyrna Brown","#795548","Smyrna (Izmir)","Aegean Turkey","city",38.42,27.14],
+["Dubrovnik Blue","#1A5882","Dubrovnik","Dalmatia, Croatia","city",42.65,18.09],
+["Havana","#7B3F00","Havana (La Habana)","Cuba","city",23.13,-82.38],
+["Rio Blue","#00B5E2","Rio de Janeiro","Brazil","city",-22.90,-43.17],
+["Lima Gold","#C6A840","Lima","Peru","city",-12.05,-77.04],
+["Santiago Blue","#1A5276","Santiago","Chile","city",-33.46,-70.65],
+["Buenos Aires Blue","#2E4482","Buenos Aires","Argentina","city",-34.61,-58.38],
+["Bogota Green","#3A5A40","Bogota","Colombia","city",4.71,-74.07],
+["Tangerine","#F28500","Tangier (Tanger)","Morocco","city",35.76,-5.80],
+["Zanzibar Gold","#F4B942","Zanzibar City","Tanzania","city",-6.16,39.20],
+["Marrakech Red","#B5451B","Marrakech","Morocco","city",31.63,-8.01],
+["Cairo Sand","#C8A97E","Cairo (Al-Qahirah)","Egypt","city",30.05,31.24],
+["Carthage Red","#9B2335","Carthage","Tunisia","city",36.86,10.34],
+["Timbuktu Gold","#C8A060","Timbuktu","Mali","city",16.77,-3.01],
+["Damascus Rose","#AA4466","Damascus (Dimashq)","Syria","city",33.51,36.29],
+["Petra Rose","#D9785A","Petra","Jordan","city",30.33,35.48],
+["Samarkand Blue","#2F6690","Samarkand","Uzbekistan","city",39.65,66.96],
+["Kabul Brown","#8B6040","Kabul","Afghanistan","city",34.52,69.18],
+["Lhasa Red","#992B2B","Lhasa","Tibet, China","city",29.65,91.13],
+["Ulaanbaatar Ochre","#B8860B","Ulaanbaatar","Mongolia","city",47.92,106.92],
+["Kyoto Grey","#8B8589","Kyoto","Japan","city",35.01,135.77],
+["Canton Red","#C7372F","Canton (Guangzhou)","Guangdong, China","city",23.13,113.26],
+["Peking Blue","#154360","Peking (Beijing)","China","city",39.91,116.39],
+["Nanking Yellow","#F5DEB3","Nanking (Nanjing)","Jiangsu, China","city",32.06,118.80],
+["Hong Kong Blue","#4A90D9","Hong Kong","China SAR","city",22.32,114.17],
+["Seoul Blue","#3D6EA5","Seoul","South Korea","city",37.57,126.98],
+["Madras Red","#C0392B","Madras (Chennai)","Tamil Nadu, India","city",13.08,80.27],
+["Bombay Brown","#B5651D","Bombay (Mumbai)","Maharashtra, India","city",19.08,72.88],
+["Calcutta Green","#4E8B57","Calcutta (Kolkata)","West Bengal, India","city",22.57,88.36],
+["Manila Yellow","#F5E784","Manila","Luzon, Philippines","city",14.60,120.98],
+["Nairobi Green","#2D6A4F","Nairobi","Kenya","city",-1.29,36.82],
+["Accra Gold","#C8A020","Accra","Ghana","city",5.55,-0.20],
+["Lagos Orange","#E05D04","Lagos","Nigeria","city",6.52,3.38],
+["Cape Town Blue","#1B7FBD","Cape Town","Western Cape, South Africa","city",-33.93,18.42],
+["Alexandria Blue","#2E87C1","Alexandria","Egypt","city",31.20,29.92],
+["Sydney Blue","#0073A8","Sydney","New South Wales, Australia","city",-33.87,151.21],
+["Melbourne Grey","#6E7F8D","Melbourne","Victoria, Australia","city",-37.81,144.96],
+["Auckland Blue","#2471A3","Auckland","New Zealand","city",-36.87,174.77],
+["Prussian Blue","#003153","Prussia","Historical N. European state","region",52.50,13.40],
+["Saxe Blue","#4F69C6","Saxony (Sachsen)","Germany","region",51.10,13.20],
+["Raw Umber","#826644","Umbria","Central Italy","region",43.11,12.39],
+["Burnt Umber","#8A3324","Umbria","Central Italy","region",43.09,12.37],
+["Tuscan Red","#7C3030","Tuscany (Toscana)","Italy","region",43.77,11.25],
+["Tuscan Yellow","#E1A95F","Tuscany (Toscana)","Italy","region",43.79,11.27],
+["Burgundy","#800020","Burgundy (Bourgogne)","France","region",47.05,4.84],
+["Champagne","#F7E7CE","Champagne","France","region",49.00,4.00],
+["Chartreuse","#7FFF00","Chartreuse","Dauphine, France","region",45.37,5.72],
+["Normandy Grey","#8A9198","Normandy","France","region",49.00,0.50],
+["Alsace Gold","#D4A520","Alsace","France","region",48.30,7.50],
+["Flanders Brown","#6B4F3A","Flanders","Belgium","region",51.00,3.50],
+["Bohemian Green","#3B6E3A","Bohemia","Czech Republic","region",50.08,14.43],
+["Catalonia Red","#CC1018","Catalonia","Spain","region",41.70,1.80],
+["Caledonian Blue","#4370A4","Caledonia","Scotland, UK","region",57.50,-4.00],
+["Lapland Blue","#89BFDE","Lapland","Scandinavia","region",68.00,26.00],
+["Siberia White","#E8E4D8","Siberia","Russia","region",60.00,100.00],
+["Dalmatia Blue","#1A6496","Dalmatia","Croatia","region",43.50,17.00],
+["Californian Gold","#D4A017","California","USA","region",37.00,-120.00],
+["Carolina Blue","#57A0D2","Carolinas","USA","region",35.75,-79.02],
+["Georgia Peach","#FFCBA4","Georgia","USA","region",32.16,-82.90],
+["Yukon Gold","#C5930A","Yukon","Canada","region",63.00,-135.00],
+["Patagonian Blue","#4A7FA5","Patagonia","Argentina / Chile","region",-45.00,-69.00],
+["Kashmir Blue","#4E6E9C","Kashmir","India / Pakistan","region",34.00,76.00],
+["Punjab Gold","#CFA020","Punjab","India / Pakistan","region",30.90,75.85],
+["Rajasthan Pink","#C86050","Rajasthan","India","region",27.00,73.00],
+["Bengal Green","#3B6E5A","Bengal","India / Bangladesh","region",23.00,89.00],
+["Deccan Brown","#8B6547","Deccan Plateau","India","region",17.00,76.00],
+["Tibet Red","#B03060","Tibet (Xizang)","China","region",31.00,88.00],
+["Szechuan Red","#AA2B2B","Sichuan","China","region",30.70,104.07],
+["Manchurian Brown","#7B5635","Manchuria","Northeast China","region",46.00,126.00],
+["Yunnan Green","#3A5F42","Yunnan","China","region",24.50,101.50],
+["Java Brown","#5B4A42","Java (Jawa)","Indonesia","region",-7.60,110.65],
+["Natal Brown","#D79762","Natal","KwaZulu-Natal, South Africa","region",-29.60,30.38],
+["Mesopotamia Gold","#C8A060","Mesopotamia","Iraq","region",33.00,44.00],
+["Levant Blue","#2E75B6","Levant","Eastern Mediterranean","region",33.50,36.00],
+["Maghreb Red","#C03020","Maghreb","North Africa","region",33.00,2.00],
+["Masai Red","#B03830","Masai Mara","Kenya / Tanzania","region",-1.40,35.00],
+["Pampas Green","#5A8A50","Pampas","Argentina","region",-34.00,-62.00],
+["Egyptian Blue","#1034A6","Egypt","North Africa","country",26.00,30.00],
+["Persian Blue","#1C39BB","Persia (Iran)","Middle East","country",32.00,53.00],
+["Persian Orange","#D99058","Persia (Iran)","Middle East","country",32.20,53.20],
+["Persian Red","#CC3333","Persia (Iran)","Middle East","country",31.80,52.80],
+["Persian Green","#00A693","Persia (Iran)","Middle East","country",32.10,53.10],
+["Persian Rose","#FE28A2","Persia (Iran)","Middle East","country",31.90,52.90],
+["Turquoise","#40E0D0","Turkey (Turkiye)","Anatolia","country",39.00,35.00],
+["Turkey Red","#A91101","Turkey (Turkiye)","Anatolia","country",39.20,35.20],
+["Turkish Blue","#00B1D3","Turkey (Turkiye)","Anatolia","country",38.80,34.80],
+["Indigo","#4B0082","India (Indus Valley)","South Asia","country",20.00,77.00],
+["Indian Red","#CD5C5C","India","South Asia","country",20.20,77.20],
+["Indian Yellow","#E3A857","India","South Asia","country",19.80,76.80],
+["Chinese Red","#AA381E","China","East Asia","country",35.00,105.00],
+["Chinese Violet","#856088","China","East Asia","country",35.20,105.20],
+["Japanese Violet","#5B3256","Japan","East Asia","country",36.20,138.25],
+["Maya Blue","#73C2FB","Maya Civilization","Mesoamerica","country",17.00,-92.00],
+["Aztec Gold","#C39953","Aztec Empire","Mesoamerica","country",19.43,-99.13],
+["Inca Gold","#C68642","Inca Empire","Andean South America","country",-13.16,-72.54],
+["Gamboge","#E49B0F","Cambodia (Gambogia)","Southeast Asia","country",12.57,104.99],
+["Siamese","#FFB75E","Siam (Thailand)","Southeast Asia","country",15.00,101.00],
+["Moroccan Red","#C1272D","Morocco","North Africa","country",32.00,-5.00],
+["Mexican Pink","#E4007C","Mexico","North America","country",23.63,-102.55],
+["Ceylon Blue","#3B7A8E","Ceylon (Sri Lanka)","South Asia","country",7.87,80.77],
+["Dutch Orange","#FF6600","Netherlands","Western Europe","country",52.37,4.90],
+["Irish Green","#009A44","Ireland","Western Europe","country",53.35,-6.26],
+["Swedish Blue","#006AA7","Sweden","Scandinavia","country",59.33,18.07],
+["Spanish Red","#C60B1E","Spain","Iberian Peninsula","country",40.42,-3.70],
+["Portuguese Blue","#005DAA","Portugal","Iberian Peninsula","country",38.72,-9.14],
+["Nubian Brown","#905D3D","Nubia","Egypt / Sudan","country",21.00,33.00],
+["Abyssinian Green","#4B6B43","Abyssinia (Ethiopia)","East Africa","country",8.00,38.00],
+["Rhodesian Green","#4C6A30","Rhodesia (Zimbabwe)","Southern Africa","country",-20.00,30.00],
+["Adriatic Blue","#3E6694","Adriatic Sea","Mediterranean Europe","water",43.00,16.00],
+["Mediterranean Blue","#006994","Mediterranean Sea","Europe / North Africa","water",35.00,18.00],
+["Aegean Blue","#4D82B8","Aegean Sea","Greece / Turkey","water",38.00,25.00],
+["Caribbean Blue","#00B7EB","Caribbean Sea","Central America / Caribbean","water",15.00,-75.00],
+["Pacific Blue","#1CA9C9","Pacific Ocean","Global","water",0.00,-160.00],
+["Atlantic Blue","#235F9C","Atlantic Ocean","Global","water",20.00,-30.00],
+["Baltic Blue","#1D6FA4","Baltic Sea","Northern Europe","water",58.50,20.00],
+["Caspian Blue","#2E86AB","Caspian Sea","Central Asia","water",41.50,51.00],
+["Arctic Blue","#89CFF0","Arctic Ocean","North Polar region","water",85.00,0.00],
+["Red Sea Blue","#2C85A8","Red Sea","Middle East / East Africa","water",20.00,38.00],
+["Black Sea Blue","#1A5276","Black Sea","Southeastern Europe","water",43.00,34.00],
+["Yellow Sea Blue","#3A8FBF","Yellow Sea","East Asia","water",35.00,122.00],
+["Persian Gulf Blue","#1B7FBD","Persian Gulf","Middle East","water",26.00,52.00],
+["Arabian Blue","#006B8A","Arabian Sea","Indian Ocean","water",15.00,65.00],
+["Tasman Blue","#2E75B6","Tasman Sea","Australasia","water",-40.00,158.00],
+["Drake Blue","#1A4E7A","Drake Passage","Southern Ocean","water",-57.00,-65.00],
+["Nile Blue","#19597D","Nile River","Egypt / Sudan","water",26.00,32.00],
+["Nile Green","#69A189","Nile River","Egypt / Sudan","water",25.80,31.80],
+["Amazon Green","#3B7A57","Amazon River","South America","water",-3.00,-60.00],
+["Congo Brown","#5C4033","Congo River","Central Africa","water",-4.00,15.30],
+["Ganges Blue","#3A7CA5","Ganges (Ganga) River","India","water",25.00,83.00],
+["Danube Blue","#2D5F8A","Danube River","Central Europe","water",47.50,19.00],
+["Rhine Blue","#4B7AA5","Rhine River","Central Europe","water",51.00,7.00],
+["Mississippi Brown","#6B4F3A","Mississippi River","USA","water",33.00,-90.00],
+["Orinoco Green","#4A7C59","Orinoco River","Venezuela","water",7.00,-64.00],
+["Volga Blue","#2C5F8A","Volga River","Russia","water",55.00,50.00],
+["Ob Blue","#2C7BB5","Ob River","Russia","water",63.00,69.00],
+["Lena Blue","#2E70B0","Lena River","Siberia, Russia","water",65.00,126.00],
+["Tigris Brown","#8B6914","Tigris River","Iraq / Turkey","water",36.00,43.00],
+["Euphrates Brown","#9B7653","Euphrates River","Iraq / Syria","water",34.00,43.20],
+["Mekong Blue","#2980B9","Mekong River","Southeast Asia","water",20.00,102.00],
+["Irrawaddy Brown","#8B6547","Irrawaddy River","Myanmar","water",20.00,94.00],
+["Niger Brown","#784421","Niger River","West Africa","water",13.00,4.00],
+["Zambezi Blue","#2E75B6","Zambezi River","Southern Africa","water",-15.00,30.10],
+["Colorado Brown","#8B5A2B","Colorado River","USA","water",36.00,-112.00],
+["Mackenzie Blue","#2C5F8A","Mackenzie River","Canada","water",66.00,-128.00],
+["Hudson Blue","#4A80B5","Hudson River","New York, USA","water",42.00,-73.90],
+["Murray Blue","#3070A8","Murray River","Australia","water",-34.60,139.39],
+["Indus Blue","#2E5E8E","Indus River","Pakistan / India","water",28.00,69.00],
+["Yangtze Blue","#2275AA","Yangtze River","China","water",31.00,110.00],
+["Jordan Blue","#3A7CA5","Jordan River","Middle East","water",32.00,35.56],
+["Tiber Brown","#7B5E3A","Tiber (Tevere) River","Italy","water",41.90,12.45],
+["Limpopo Brown","#8B7355","Limpopo River","Southern Africa","water",-24.50,33.50],
+["Bosphorus Blue","#1A5276","Bosphorus Strait","Turkey","water",41.12,29.07],
+["Aral Blue","#2573B5","Aral Sea","Central Asia","water",45.00,60.00],
+["Baikal Blue","#0A3D62","Lake Baikal","Russia","water",53.50,108.00],
+["Superior Blue","#1A6496","Lake Superior","USA / Canada","water",47.50,-85.00],
+["Victoria Blue","#0E6FA8","Lake Victoria","East Africa","water",-1.00,33.00],
+["Tanganyika Blue","#0D6986","Lake Tanganyika","East Africa","water",-6.00,29.60],
+["Titicaca Blue","#2E86C1","Lake Titicaca","Peru / Bolivia","water",-15.85,-69.33],
+["Okavango Green","#4A7C59","Okavango Delta","Botswana","water",-19.50,23.00],
+["Alpine White","#EAE7DC","Alps","Central Europe","landform",46.50,9.50],
+["Dolomite White","#F2EFE4","Dolomites","Northern Italy","landform",46.40,11.85],
+["Pyrenean Grey","#8B9196","Pyrenees","France / Spain","landform",42.80,0.50],
+["Carpathian Green","#3B6B3A","Carpathians","Central Europe","landform",49.00,22.00],
+["Himalayan Blue","#6B8E9F","Himalayas","South / Central Asia","landform",28.00,84.00],
+["Hindu Kush","#7B5A3A","Hindu Kush","Afghanistan / Pakistan","landform",35.50,71.00],
+["Pamir Brown","#7B5635","Pamir Mountains","Tajikistan","landform",38.50,74.00],
+["Tian Shan Blue","#3A6EA5","Tian Shan","Central Asia","landform",42.00,80.00],
+["Atlas Brown","#8B6040","Atlas Mountains","Morocco / Algeria","landform",32.00,-1.50],
+["Drakensberg Green","#4A7450","Drakensberg","South Africa","landform",-29.50,29.50],
+["Andean Green","#4F7942","Andes","South America","landform",-20.00,-68.00],
+["Appalachian Green","#5C6E3E","Appalachian Mountains","Eastern USA","landform",37.00,-82.00],
+["Rocky Mountain Blue","#2E6DA4","Rocky Mountains","North America","landform",47.00,-113.00],
+["Caucasian Grey","#8B8589","Caucasus Mountains","Europe / Asia","landform",42.50,44.00],
+["Saharan Sand","#F4A460","Sahara Desert","North Africa","landform",23.00,12.00],
+["Atacama Sand","#C2A664","Atacama Desert","Chile / Peru","landform",-24.00,-69.00],
+["Gobi Sand","#D9B48F","Gobi Desert","Mongolia / China","landform",42.00,103.00],
+["Namib Ochre","#CC7722","Namib Desert","Namibia","landform",-24.00,15.00],
+["Kalahari Red","#C65B3B","Kalahari Desert","Southern Africa","landform",-24.00,22.00],
+["Rub al-Khali Sand","#D4A055","Rub al-Khali","Arabian Peninsula","landform",21.00,51.00],
+["Taklamakan Sand","#D4B068","Taklamakan Desert","Xinjiang, China","landform",38.00,83.00],
+["Mojave Sand","#C2B280","Mojave Desert","USA","landform",35.00,-116.00],
+["Sonoran Sand","#C2A47A","Sonoran Desert","USA / Mexico","landform",31.50,-112.00],
+["Outback Red","#A05C34","Australian Outback","Australia","landform",-25.00,134.00],
+["Uluru Red","#C1440E","Uluru (Ayers Rock)","Northern Territory, Australia","landform",-25.34,131.04],
+["Nullarbor Grey","#C4BBAC","Nullarbor Plain","Australia","landform",-31.50,126.00],
+["Cape Blue","#0059A3","Cape of Good Hope","South Africa","landform",-34.36,18.47],
+["Tibetan Blue","#3B6EA5","Tibetan Plateau","China","landform",32.00,90.00],
+["Sinai Gold","#C9A85C","Sinai Peninsula","Egypt","landform",29.50,33.90],
+["Vesuvian Brown","#734A12","Mt. Vesuvius","Campania, Italy","landform",40.82,14.43],
+["Fuji White","#F9F4EE","Mt. Fuji","Honshu, Japan","landform",35.36,138.73],
+["Kilimanjaro White","#EDE8DF","Mt. Kilimanjaro","Tanzania","landform",-3.07,37.35],
+["Hawaiian Lava","#1C1C1C","Hawaiian Islands","Pacific, USA","landform",20.80,-156.30],
+["Icelandic Grey","#B0A9A0","Iceland","North Atlantic","landform",64.96,-19.02],
+["Serengeti Gold","#DAA520","Serengeti Plain","Tanzania","landform",-2.33,34.83],
+["Pantanal Green","#3A7A50","Pantanal","Brazil / Bolivia","landform",-17.00,-57.50],
+["Amazonian Green","#2ECC71","Amazon Basin","South America","landform",-5.00,-55.00],
+["Patagonian Steppe","#9C7A3C","Patagonian Steppe","South America","landform",-47.00,-70.00],
+["Sahel Brown","#9C7A3C","Sahel","West Africa","landform",14.20,-2.00],
+["Siberian Taiga","#2D6A4F","Siberian Taiga","Russia","landform",58.00,80.00],
+["Pampas Green","#5A8A50","Pampas","Argentina","landform",-34.00,-62.00]
+];
+
+/* ── HSV ── */
+function hsv(hex){
+  let r=parseInt(hex.slice(1,3),16)/255,g=parseInt(hex.slice(3,5),16)/255,b=parseInt(hex.slice(5,7),16)/255;
+  let mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn,h=0,s=mx===0?0:d/mx,v=mx;
+  if(d!==0){if(mx===r)h=(g-b)/d;else if(mx===g)h=(b-r)/d+2;else h=(r-g)/d+4;h=((h%6)+6)%6/6;}
+  return[Math.round(h*360),Math.round(s*100),Math.round(v*100)];
+}
+
+const BL={city:'b-city',region:'b-region',country:'b-country',water:'b-water',landform:'b-landform'};
+const BN={city:'City / Town',region:'Region / Province',country:'Country / Empire',water:'Water Body',landform:'Landform'};
+const COLORS=RAW.map((r,i)=>{const[h,s,v]=hsv(r[1]);return{i,n:r[0],hex:r[1],pl:r[2],cx:r[3],cat:r[4],la:r[5],lo:r[6],h,s,v};});
+
+let cat='',srtK='h',srtD=1,selIdx=-1;
+const markers=[];
+let lightTile,darkTile,isDark=false;
+
+/* ── THEME ── */
+function toggleTheme(){
+  isDark=!isDark;
+  document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+  document.getElementById('themeBtn').innerHTML=isDark?'&#x25D1; Light':'&#x25D1; Dark';
+  if(isDark){if(lightTile)map.removeLayer(lightTile);darkTile.addTo(map);}
+  else{if(darkTile)map.removeLayer(darkTile);lightTile.addTo(map);}
+  try{localStorage.setItem('gc-theme',isDark?'dark':'light');}catch(e){}
+}
+
+/* ── CREDITS DRAWER ── */
+let credOpen=false;
+function toggleCredits(){
+  credOpen=!credOpen;
+  document.getElementById('creditsDrawer').classList.toggle('open',credOpen);
+  const btn=document.getElementById('credBtn');
+  btn.classList.toggle('open',credOpen);
+  btn.innerHTML=credOpen?'Credits &amp; methodology &#x25B4;':'Credits &amp; methodology &#x25BE;';
+}
+
+/* ── TABLE CSV EXPORT ── */
+function exportCSV(){
+  const q=document.getElementById('srch').value.toLowerCase();
+  let fd=COLORS.filter(c=>{
+    if(cat&&c.cat!==cat)return false;
+    if(!q)return true;
+    return c.n.toLowerCase().includes(q)||c.pl.toLowerCase().includes(q)||c.cx.toLowerCase().includes(q)||c.hex.toLowerCase().includes(q);
+  });
+  fd.sort((a,b)=>{let av=a[srtK],bv=b[srtK];if(typeof av==='string')return srtD*av.localeCompare(bv);return srtD*(av-bv);});
+  const hdr=['Colour Name','Hex','Place','Context','Type','Latitude','Longitude','H (deg)','S (%)','V (%)'];
+  const rows=fd.map(c=>[c.n,c.hex,c.pl,c.cx,BN[c.cat],c.la,c.lo,c.h,c.s,c.v]);
+  const csv=[hdr,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='geographic-colours'+(cat?'-'+cat:'')+(fd.length<COLORS.length?'-filtered':'')+'.csv';
+  a.click();URL.revokeObjectURL(a.href);
+}
+
+/* ── MAP ── */
+const map=L.map('map',{zoomControl:true,preferCanvas:true}).setView([20,10],2);
+const tOpts={maxZoom:18,subdomains:'abcd',attribution:'&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com">CARTO</a>'};
+lightTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',tOpts).addTo(map);
+darkTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',tOpts);
+
+/* ── MAP INFO CONTROL ── */
+const infoCtrl=L.control({position:'bottomleft'});
+infoCtrl.onAdd=function(){
+  const d=L.DomUtil.create('div','map-info');
+  d.id='mapInfo';
+  d.innerHTML='<div class="mi-empty">click a marker or table row</div>';
+  L.DomEvent.disableClickPropagation(d);
+  return d;
+};
+infoCtrl.addTo(map);
+
+function updateInfoCtrl(c){
+  const d=document.getElementById('mapInfo');
+  if(!c){d.innerHTML='<div class="mi-empty">click a marker or table row</div>';return;}
+  const inPal=palette.some(p=>p.hex===c.hex);
+  d.innerHTML=
+    '<a class="mi-swatch" href="https://www.color-hex.com/color/'+c.hex.slice(1)+'" target="_blank" rel="noopener" title="View on color-hex.com" style="background:'+c.hex+'">'+
+      '<div class="mi-label"><div class="mi-name">'+c.n+'</div><div class="mi-code">'+c.hex+'</div></div>'+
+    '</a>'+
+    '<div class="mi-body">'+
+      '<div class="mi-hsv">H:'+c.h+'&#xB0; &nbsp;S:'+c.s+'% &nbsp;V:'+c.v+'%</div>'+
+      '<button class="mi-add" onclick="addToPalette('+c.i+',null)" '+(inPal?'disabled title="Already in palette"':'title="Add to palette"')+'>'+(inPal?'&#x2713; In palette':'+ Add to palette')+'</button>'+
+    '</div>';
+}
+
+COLORS.forEach((c,i)=>{
+  const m=L.circleMarker([c.la,c.lo],{radius:7,fillColor:c.hex,color:'rgba(255,255,255,0.85)',weight:1.5,fillOpacity:0.92}).addTo(map);
+  m.bindTooltip(c.n,{direction:'top',offset:[0,-6],opacity:1});
+  m.bindPopup('<div class="lp"><div class="lp-head"><div class="lp-sw" style="background:'+c.hex+'"></div><div><div class="lp-nm">'+c.n+'</div><div class="lp-pl">'+c.pl+'<br>'+c.cx+'</div></div></div><div class="lp-hsv">'+c.hex+' &middot; H:'+c.h+'&deg; S:'+c.s+'% V:'+c.v+'%</div><div style="margin-top:5px"><span class="badge '+BL[c.cat]+'">'+BN[c.cat]+'</span></div></div>',{maxWidth:230});
+  m.on('click',()=>selectColor(i,false));
+  markers.push(m);
+});
+
+function selectColor(idx,flyTo){
+  if(selIdx>=0&&markers[selIdx])markers[selIdx].setStyle({weight:1.5,radius:7,color:'rgba(255,255,255,0.85)'});
+  document.querySelectorAll('tbody tr.sel').forEach(r=>r.classList.remove('sel'));
+  selIdx=idx;
+  if(idx<0){updateInfoCtrl(null);return;}
+  markers[idx].setStyle({weight:3,radius:10,color:'#fff'});
+  if(flyTo)map.flyTo([COLORS[idx].la,COLORS[idx].lo],5,{duration:1.2});
+  markers[idx].openPopup();
+  const row=document.getElementById('r'+idx);
+  if(row){row.classList.add('sel');row.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  updateInfoCtrl(COLORS[idx]);
+}
+
+/* ── DRAG HANDLE ── */
+(function(){
+  const handle=document.getElementById('dragHandle');
+  const mapPane=document.getElementById('mapPane');
+  const main=document.getElementById('mainPane');
+  let dragging=false;
+  const DEFAULT_SPLIT=50;
+  try{const s=parseFloat(localStorage.getItem('gc-split'));if(s>=18&&s<=82)mapPane.style.width=s+'%';}catch(e){}
+  if(!mapPane.style.width)mapPane.style.width=DEFAULT_SPLIT+'%';
+  handle.addEventListener('mousedown',e=>{
+    dragging=true;handle.classList.add('dragging');
+    document.body.style.cursor='col-resize';document.body.style.userSelect='none';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove',e=>{
+    if(!dragging)return;
+    const rect=main.getBoundingClientRect();
+    const pct=Math.min(Math.max((e.clientX-rect.left)/rect.width*100,18),82);
+    mapPane.style.width=pct.toFixed(1)+'%';
+    map.invalidateSize();
+  });
+  document.addEventListener('mouseup',()=>{
+    if(!dragging)return;
+    dragging=false;handle.classList.remove('dragging');
+    document.body.style.cursor='';document.body.style.userSelect='';
+    try{localStorage.setItem('gc-split',parseFloat(mapPane.style.width).toFixed(1));}catch(e){}
+  });
+})();
+
+/* ── FILTER / SORT ── */
+function setcat(c){
+  cat=c;
+  document.querySelectorAll('.chip').forEach(el=>el.classList.remove('on'));
+  document.getElementById('chip-'+c).classList.add('on');
+  COLORS.forEach((d,i)=>{if(!c||d.cat===c)markers[i].addTo(map);else markers[i].remove();});
+  go();
+}
+
+const sortChipIds={h:'chip-hue',s:'chip-sat',v:'chip-val',la:'chip-la',lo:'chip-lo'};
+function setSrt(k,d){
+  if(srtK===k)srtD*=-1;else{srtK=k;srtD=d||1;}
+  Object.values(sortChipIds).forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('on');});
+  if(sortChipIds[k])document.getElementById(sortChipIds[k]).classList.add('on');
+  go();
+}
+
+function go(){
+  const q=document.getElementById('srch').value.toLowerCase();
+  let fd=COLORS.filter(c=>{
+    if(cat&&c.cat!==cat)return false;
+    if(!q)return true;
+    return c.n.toLowerCase().includes(q)||c.pl.toLowerCase().includes(q)||c.cx.toLowerCase().includes(q)||c.hex.toLowerCase().includes(q);
+  });
+  fd.sort((a,b)=>{let av=a[srtK],bv=b[srtK];if(typeof av==='string')return srtD*av.localeCompare(bv);return srtD*(av-bv);});
+  ['n','hx','pl','cat','la','lo','h','s','v'].forEach(k=>{
+    const el=document.getElementById('si-'+k);
+    if(el)el.textContent=srtK===k?(srtD>0?' \u2191':' \u2193'):'';
+  });
+  const total=COLORS.length;
+  document.getElementById('hcnt').textContent=fd.length===total?total+' colours':fd.length+'/'+total;
+  document.getElementById('tb').innerHTML=fd.map(c=>
+    '<tr id="r'+c.i+'" onclick="selectColor('+c.i+',true)"'+(c.i===selIdx?' class="sel"':'')+'>'+
+    '<td><span class="sw" style="background:'+c.hex+'"></span><button class="add-pal" onclick="addToPalette('+c.i+',event)" title="Add to palette">+</button></td>'+
+    '<td><span class="cn">'+c.n+'</span></td>'+
+    '<td><span class="hx">'+c.hex+'</span></td>'+
+    '<td><span class="pl">'+c.pl+'</span><span class="cx">'+c.cx+'</span></td>'+
+    '<td><span class="badge '+BL[c.cat]+'">'+BN[c.cat]+'</span></td>'+
+    '<td class="co">'+c.la.toFixed(2)+'&deg;</td>'+
+    '<td class="co">'+c.lo.toFixed(2)+'&deg;</td>'+
+    '<td style="text-align:right"><span class="hd" style="background:hsl('+c.h+',100%,50%)"></span><span class="nm">'+c.h+'</span></td>'+
+    '<td><span class="nm">'+c.s+'</span><div class="bar"><div class="bf" style="width:'+c.s+'%;background:hsl('+c.h+',60%,40%)"></div></div></td>'+
+    '<td><span class="nm">'+c.v+'</span><div class="bar"><div class="bf" style="width:'+c.v+'%;background:var(--ink-mid)"></div></div></td>'+
+    '</tr>'
+  ).join('');
+  // footer bar stats
+  const cats={};COLORS.forEach(c=>{cats[c.cat]=(cats[c.cat]||0)+1;});
+  document.getElementById('fbStats').innerHTML=
+    '<span class="fb-stat"><b>'+COLORS.length+'</b> colours</span>'+
+    '<span class="fb-sep"></span>'+
+    '<span class="fb-stat"><b>'+(cats.city||0)+'</b> cities</span>'+
+    '<span class="fb-stat"><b>'+(cats.region||0)+'</b> regions</span>'+
+    '<span class="fb-stat"><b>'+(cats.country||0)+'</b> countries</span>'+
+    '<span class="fb-stat"><b>'+(cats.water||0)+'</b> water</span>'+
+    '<span class="fb-stat"><b>'+(cats.landform||0)+'</b> landforms</span>';
+}
+
+/* ── PALETTE ── */
+let palette=[];
+let palOpen=false;
+let palSortKey=null;
+const palSortDir={h:1,s:-1,v:1,lum:1};
+const palSortLabels={h:'Hue',s:'Saturation',v:'Brightness',lum:'Luminance'};
+const dirArrow={'1':' ↑','-1':' ↓'};
+let dragSrc=-1;
+
+function togglePalette(){
+  palOpen=!palOpen;
+  document.getElementById('palTray').classList.toggle('open',palOpen);
+  document.getElementById('palBtn').classList.toggle('active',palOpen);
+}
+
+function sortPalette(key){
+  if(!palette.length)return;
+  if(palSortKey===key){palSortDir[key]*=-1;}
+  else{palSortKey=key;}
+  palette.sort((a,b)=>palSortDir[key]*(a[key]-b[key]));
+  renderPalette();
+}
+
+function removeFromPalette(hex){
+  palette=palette.filter(p=>p.hex!==hex);
+  renderPalette();
+  if(selIdx>=0)updateInfoCtrl(COLORS[selIdx]);
+}
+
+function clearPalette(){
+  palette=[];palSortKey=null;
+  renderPalette();
+  if(selIdx>=0)updateInfoCtrl(COLORS[selIdx]);
+}
+
+function openTineye(){
+  if(palette.length>5)return;
+  const hexes=palette.map(p=>p.hex.slice(1)).join(',');
+  const w=Math.round(100/palette.length);
+  const weights=palette.map(()=>w).join(',');
+  window.open('https://labs.tineye.com/multicolr/#colors='+hexes+';weights='+weights,'_blank');
+}
+
+function addToPalette(idx,e){
+  if(e)e.stopPropagation();
+  const c=COLORS[idx];
+  if(palette.find(p=>p.hex===c.hex))return;
+  const r=parseInt(c.hex.slice(1,3),16),g=parseInt(c.hex.slice(3,5),16),b=parseInt(c.hex.slice(5,7),16);
+  const lum=Math.round((0.299*r+0.587*g+0.114*b)/255*100);
+  palette.push({hex:c.hex,n:c.n,h:c.h,s:c.s,v:c.v,r,g,b,lum,i:idx});
+  if(!palOpen)togglePalette();
+  palSortKey=null;
+  renderPalette();
+  if(selIdx===idx)updateInfoCtrl(COLORS[idx]);
+}
+
+function exportPaletteCSV(){
+  if(!palette.length)return;
+  const hdr=['Colour Name','Hex','R','G','B','H (deg)','S (%)','V (%)','Luminance (%)'];
+  const rows=palette.map(p=>[p.n,p.hex,p.r,p.g,p.b,p.h,p.s,p.v,p.lum]);
+  const csv=[hdr,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='geographic-palette-'+palette.length+'colours'+(palSortKey?'-by-'+palSortKey:'')+'.csv';
+  a.click();URL.revokeObjectURL(a.href);
+}
+
+function downloadPNG(){
+  if(!palette.length)return;
+  const n=palette.length;
+  const SW=Math.max(120,Math.min(200,Math.floor(1200/n)));
+  const SH=160,TH=72,W=SW*n,H=SH+TH;
+  const canvas=document.createElement('canvas');
+  canvas.width=W;canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#F7F3EB';ctx.fillRect(0,0,W,H);
+  palette.forEach((p,i)=>{
+    const x=i*SW;
+    ctx.fillStyle=p.hex;ctx.fillRect(x,0,SW,SH);
+    ctx.fillStyle='rgba(255,255,255,0.25)';ctx.fillRect(x+SW-1,0,1,SH);
+    ctx.fillStyle='#1C140A';ctx.textAlign='center';
+    const cx=x+SW/2;
+    ctx.font='600 11.5px serif';
+    const words=p.n.split(' ');
+    let line='',y=SH+15,lh=13;
+    words.forEach((w,wi)=>{
+      const test=line+(line?' '+w:w);
+      if(ctx.measureText(test).width>SW-10&&line){ctx.fillText(line,cx,y);y+=lh;line=w;}
+      else{line=test;}
+      if(wi===words.length-1){ctx.fillText(line,cx,y);y+=lh;}
+    });
+    ctx.font='9.5px monospace';ctx.fillStyle='#5A4830';
+    ctx.fillText(p.hex,cx,SH+TH-30);
+    ctx.fillText('R:'+p.r+' G:'+p.g+' B:'+p.b,cx,SH+TH-18);
+    ctx.fillText('H:'+p.h+'\u00B0 S:'+p.s+'% V:'+p.v+'%',cx,SH+TH-6);
+  });
+  canvas.toBlob(blob=>{
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download='geographic-palette-'+n+'colours'+(palSortKey?'-by-'+palSortKey:'')+'.png';
+    a.click();URL.revokeObjectURL(a.href);
+  });
+}
+
+function renderPalette(){
+  const chips=document.getElementById('palChips');
+  const empty=document.getElementById('palEmpty');
+  const cnt=document.getElementById('palCount');
+  const warn=document.getElementById('palWarn');
+  const tinBtn=document.getElementById('palTinBtn');
+  const csvBtn=document.getElementById('palCSVBtn');
+  const pngBtn=document.getElementById('palPNGBtn');
+
+  // update sort button labels + active state
+  ['h','s','v','lum'].forEach(k=>{
+    const btn=document.getElementById('psb-'+k);
+    if(!btn)return;
+    btn.className='pal-sort-btn'+(palSortKey===k?' on':'');
+    btn.textContent=palSortLabels[k]+(palSortKey===k?dirArrow[String(palSortDir[k])]:'');
+  });
+
+  chips.querySelectorAll('.pal-chip-el').forEach(el=>el.remove());
+
+  if(!palette.length){
+    empty.style.display='';
+    cnt.textContent='';warn.textContent='';
+    tinBtn.disabled=true;csvBtn.disabled=true;pngBtn.disabled=true;
+    return;
+  }
+
+  empty.style.display='none';
+  cnt.textContent=palette.length+(palette.length===1?' colour':' colours');
+  csvBtn.disabled=false;pngBtn.disabled=false;
+  if(palette.length>5){
+    warn.textContent='TinEye MultiColr supports max 5 colours — remove some to enable';
+    tinBtn.disabled=true;
+  } else {
+    warn.textContent='';tinBtn.disabled=false;
+  }
+
+  palette.forEach((p,i)=>{
+    const wrap=document.createElement('div');
+    wrap.className='pal-chip-el';
+    wrap.draggable=true;
+    wrap.style.cssText='position:relative;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:0 2px;border-radius:3px;border:1.5px solid transparent;transition:border-color .1s,opacity .15s';
+
+    const grip=document.createElement('div');
+    grip.className='pal-grip';
+    grip.innerHTML='&#x2807;&#x2807;';
+    grip.title='Drag to reorder';
+
+    const chip=document.createElement('div');
+    chip.style.cssText='width:38px;height:38px;border-radius:4px;border:.5px solid rgba(0,0,0,.18);background:'+p.hex+';position:relative';
+    chip.title=p.n+' ('+p.hex+')';
+
+    const rm=document.createElement('button');
+    rm.style.cssText='position:absolute;top:-5px;right:-5px;width:14px;height:14px;border-radius:50%;background:var(--rust);color:#fff;font-size:8px;line-height:14px;text-align:center;cursor:pointer;border:none;padding:0;display:none';
+    rm.textContent='×';rm.title='Remove';
+    rm.onclick=e=>{e.stopPropagation();removeFromPalette(p.hex);};
+    chip.appendChild(rm);
+
+    wrap.addEventListener('mouseenter',()=>rm.style.display='block');
+    wrap.addEventListener('mouseleave',()=>rm.style.display='none');
+
+    const label=document.createElement('div');
+    label.style.cssText='font-size:7.5px;font-family:monospace;color:var(--ink-light);text-align:center;max-width:42px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+    label.textContent=p.hex;
+
+    wrap.appendChild(grip);wrap.appendChild(chip);wrap.appendChild(label);
+
+    wrap.addEventListener('dragstart',e=>{
+      dragSrc=i;e.dataTransfer.effectAllowed='move';
+      e.dataTransfer.setData('text/plain',String(i));
+      setTimeout(()=>{wrap.style.opacity='0.35';},0);
+    });
+    wrap.addEventListener('dragend',()=>{
+      wrap.style.opacity='';
+      chips.querySelectorAll('.pal-chip-el').forEach(el=>{el.style.borderLeftColor='transparent';el.style.borderRightColor='transparent';});
+      dragSrc=-1;
+    });
+    wrap.addEventListener('dragover',e=>{
+      e.preventDefault();e.dataTransfer.dropEffect='move';
+      chips.querySelectorAll('.pal-chip-el').forEach(el=>{el.style.borderLeftColor='transparent';el.style.borderRightColor='transparent';});
+      const rect=wrap.getBoundingClientRect();
+      if(e.clientX<rect.left+rect.width/2)wrap.style.borderLeftColor='var(--rust)';
+      else wrap.style.borderRightColor='var(--rust)';
+    });
+    wrap.addEventListener('dragleave',()=>{wrap.style.borderLeftColor='transparent';wrap.style.borderRightColor='transparent';});
+    wrap.addEventListener('drop',e=>{
+      e.preventDefault();
+      if(dragSrc<0||dragSrc===i)return;
+      const rect=wrap.getBoundingClientRect();
+      const insertAfter=e.clientX>rect.left+rect.width/2;
+      const dragged=palette.splice(dragSrc,1)[0];
+      let target=i>dragSrc?i-1:i;
+      if(insertAfter)target=Math.min(target+1,palette.length);
+      palette.splice(target,0,dragged);
+      palSortKey=null;
+      renderPalette();
+    });
+
+    chips.insertBefore(wrap,empty);
+  });
+}
+/* ── INIT ── */
+try{if(localStorage.getItem('gc-theme')==='dark')toggleTheme();}catch(e){}
+go();
+</script>
+</body>
+</html>
