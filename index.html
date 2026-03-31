@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Colours of the World — A Geographic Colour Atlas</title>
+<title>Colours of the World — A Colour Map</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -216,11 +216,11 @@ tbody tr:hover .add-pal{display:inline-block}
 <header>
   <div class="h-left">
     <h1>Colours of the World</h1>
-    <span class="h-tag">A geographic colour atlas</span>
+    <span class="h-tag">A colour map and earth palette generator</span>
   </div>
   <div class="h-right">
     <span style="font-size:12px;color:var(--ink-light);font-family:'JetBrains Mono',monospace;margin-right:3px" id="hcnt"></span>
-    <button class="btn" id="palBtn" onclick="togglePalette()">&#x25A3; Create Earth Palette</button>
+    <button class="btn" id="palBtn" onclick="togglePalette()">&#x25A3; Create Earth Colour Palette</button>
     <button class="btn" onclick="exportCSV()" title="Export current view as CSV">&#x2193; CSV</button>
     <button class="btn" onclick="toggleTheme()" id="themeBtn">&#x25D1; Dark</button>
     <button class="btn" onclick="window.print()">&#x2399; Print</button>
@@ -301,8 +301,8 @@ tbody tr:hover .add-pal{display:inline-block}
     </div>
     <div>
       <div class="cr-title">Methodology &amp; notes</div>
-      <p class="cr-text">Hex values are representative sRGB approximations &#x2014; historical pigments exist in varied formulations and the values here reflect common modern reference renderings, not a single authoritative standard. Archaic, trade, and colonial-era designations carry historical and cultural complexity; their inclusion is documentary, not an endorsement of the naming conventions of any period. HSV values are computed from the hex representations. Some geographic locations appear more than once where distinct pigment formulations are documented.</p>
-      <div class="cr-attr">Created by <a href="https://jcinnamon.github.io/" target="_blank" rel="noopener">J Cinnamon</a> (<a href="https://ccgs.ok.ubc.ca/about/contact/jonathan-cinnamon/" target="_blank" rel="noopener">UBC CCGS</a>), 2026.</div>
+      <p class="cr-text">Hex values are representative sRGB approximations &#x2014; historical pigments exist in varied formulations and the values here reflect common modern reference renderings, not a single authoritative standard. Archaic, trade, and colonial-era designations carry historical and cultural complexity thus their inclusion is documentary, not an endorsement of the naming conventions of any period. HSV values are computed from the hex representations. Some geographic locations appear more than once where distinct pigment formulations are documented.</p>
+      <div class="cr-attr">Created by <a href="https://jcinnamon.github.io/" target="_blank" rel="noopener">Jonathan Cinnamon</a> (<a href="https://ccgs.ok.ubc.ca/about/contact/jonathan-cinnamon/" target="_blank" rel="noopener">@ UBC Okanagan</a>), 2026.</div>
     </div>
   </div>
 </div>
