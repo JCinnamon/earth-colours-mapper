@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Earth Colours — A Colour Map and Earth Palette Generator</title>
+<title>Earth Colours — Geographic Colours Map and Earth Palette Generator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -243,7 +243,7 @@ tbody tr:hover .add-pal{display:inline-block}
 <header>
   <div class="h-left">
     <h1>Earth Colours</h1>
-    <span class="h-tag">An interactive map of geographic colours + cartographic palette generator</span>
+    <span class="h-tag">Geographic colours map + cartographic palette generator</span>
   </div>
   <div class="h-spacer-l"></div>
   <div class="h-pal-group">
@@ -364,10 +364,10 @@ tbody tr:hover .add-pal{display:inline-block}
       </div>
       <canvas id="rampCanvas"></canvas>
       <div class="ramp-export-row">
-        <button class="pal-btn" onclick="exportRampCSV()" data-tip="Download ramp steps as CSV — includes hex, R, G, B, H°, S%, V% for each step">&#x2193; CSV</button>
-        <button class="pal-btn" onclick="downloadRampPNG()" data-tip="Download as labelled PNG strip">&#x2193; PNG</button>
+        <button class="pal-btn" onclick="exportRampCSV()" data-tip="Export ramp steps as hex/RGB/HSV">&#x2193; CSV</button>
+        <button class="pal-btn" onclick="downloadRampPNG()" data-tip="Download as labelled PNG">&#x2193; PNG</button>
         <button class="pal-btn" onclick="exportRampQGIS()" data-tip="Export as QGIS gradient XML">&#x2193; QGIS XML</button>
-        <button class="pal-btn" onclick="exportRampCSS()" data-tip="Export as a CSS linear-gradient">&#x2193; CSS</button>
+        <button class="pal-btn" onclick="exportRampCSS()" data-tip="Export as CSS linear-gradient">&#x2193; CSS</button>
       </div>
     </div>
   </div>
