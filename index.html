@@ -87,12 +87,12 @@ td{padding:4px 7px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis}
 .b-region{background:#EAF3DE;color:#275010;border-color:#9EC45B}
 .b-country{background:#EDF0FC;color:#2D3A8C;border-color:#9BA8E8}
 .b-water{background:#E0F4F0;color:#0A5046;border-color:#5EC6AD}
-.b-landform{background:#FDF0E0;color:#5E3000;border-color:#D4A055}
+.b-pigment{background:#F9EDD4;color:#5C3A00;border-color:#C49020}
 [data-theme="dark"] .b-city{background:#3A2200;color:#F0C060;border-color:#7A5020}
 [data-theme="dark"] .b-region{background:#1A2800;color:#9EC45B;border-color:#3A5020}
 [data-theme="dark"] .b-country{background:#0E1430;color:#9BA8E8;border-color:#2D3A8C}
 [data-theme="dark"] .b-water{background:#042018;color:#5EC6AD;border-color:#0A5046}
-[data-theme="dark"] .b-landform{background:#1E0E00;color:#D4A055;border-color:#5E3000}
+[data-theme="dark"] .b-pigment{background:#2A1500;color:#C49020;border-color:#5C3A00}
 .add-pal{display:none;width:15px;height:15px;border-radius:3px;border:.5px solid var(--border-strong);background:transparent;color:var(--ink-light);font-size:10px;line-height:15px;text-align:center;cursor:pointer;flex-shrink:0;padding:0;vertical-align:middle;margin-left:3px;font-family:'JetBrains Mono',monospace;transition:all .1s}
 .add-pal:hover{color:var(--rust);border-color:var(--rust);background:rgba(139,58,31,.07)}
 tbody tr:hover .add-pal{display:inline-block}
@@ -106,6 +106,8 @@ tbody tr:hover .add-pal{display:inline-block}
 .mi-code{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.75);margin-top:1px}
 .mi-body{padding:5px 8px 6px}
 .mi-hsv{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-light)}
+.mi-wp{display:block;margin-top:4px;font-size:11px;font-family:'Crimson Pro',serif;color:var(--ink-light);text-decoration:none;text-align:right;transition:color .12s}
+.mi-wp:hover{color:var(--rust)}
 .mi-add{display:block;width:100%;margin-top:4px;padding:3px 0;font-size:11.5px;font-family:'Crimson Pro',serif;border:.5px solid var(--border-strong);border-radius:3px;background:transparent;color:var(--ink-mid);cursor:pointer;transition:all .12s;text-align:center}
 .mi-add:hover{color:var(--rust);border-color:var(--rust)}
 .mi-add:disabled{opacity:.35;cursor:default;pointer-events:none}
@@ -267,7 +269,7 @@ tbody tr:hover .add-pal{display:inline-block}
   <span class="chip" id="chip-region" onclick="setcat('region')">Region</span>
   <span class="chip" id="chip-country" onclick="setcat('country')">Country / Empire</span>
   <span class="chip" id="chip-water" onclick="setcat('water')">Water Body</span>
-  <span class="chip" id="chip-landform" onclick="setcat('landform')">Landform</span>
+  <span class="chip" id="chip-pigment" onclick="setcat('pigment')">Pigment &amp; Earth</span>
   <div class="div"></div>
   <span>Sort by:</span>
   <span class="chip" id="chip-hue" onclick="setSrt('h',1)">Hue</span>
@@ -284,19 +286,19 @@ tbody tr:hover .add-pal{display:inline-block}
   <div class="help-inner">
     <div>
       <div class="hi-title">About this site</div>
-      <p class="hi-text"><em>Earth Colours</em> is a geographical colour reference for 234 named colours whose identities are rooted in place. Browse the full list, search by name or hex value, filter by type, and follow each colour back to its corner of the world on the map.<br>For cartographers and designers, the <strong>Earth Palette</strong> tool lets you assemble colours from the collection and build perceptually smooth <strong>colour gradients</strong> ready to export.</p>
+      <p class="hi-text"><em>Earth Colours</em> is a geographical colour encyclopedia — a reference for 245 named colours with identities rooted in place. Browse the full catalogue, search by name or hex value, filter by type, and follow each colour back to its corner of the world on the map.<br><br>For cartographers and designers, the <strong>Earth Palette</strong> tool lets you assemble colours from the collection and build perceptually smooth <strong>colour gradients</strong>.</p>
     </div>
     <div>
-      <div class="hi-title">Geography in colour</div>
-      <p class="hi-text">Colour names have always carried geography. Some are straightforwardly locational, such as <strong>Sienna</strong> from Tuscany&#x2019;s iron-rich soils, <strong>Prussian Blue</strong> from Berlin&#x2019;s 18th-century dye trade, or <strong>Venetian Red</strong> from ochre deposits traded through Mediterranean ports. Others trace to the raw materials that made them, e.g. <strong>Lapis Lazuli</strong> from Afghan mines worked for millennia, <strong>Indigo</strong> from dye plants across the Indian subcontinent, <strong>Carmine</strong> from cochineal insects harvested in Mesoamerica. A third group are historical and contemporary landscape impressions, including stylized readings of savanna, glacier, or tropical sea. And some, like <strong>Tyrian Purple</strong> or <strong>Vermilion</strong>, are inseparable from the ancient trade routes that once made them priceless.</p>
+      <div class="hi-title">Colour geographies</div>
+      <p class="hi-text">Colour names have always invoked geography. Many colour names flag a location: <strong>Bordeaux</strong> from a wine capital, <strong>Magenta</strong> from a Lombardy battlefield,or <strong>Dresden Blue</strong> from a local Saxon porcelain tradition. Others evoke visual landscape, particularly the rivers, seas, and lakes that mark the world as blue and green.A distinct tradition names colours for their physical source: the iron-rich clays outside <strong>Siena</strong>, Vermilion extracted at <strong>Almad&#xe9;n</strong>, Carmine from insects in <strong>Oaxaca</strong>, or lapis lazuli quarried in <strong>Badakhshan</strong> for five thousand years.</p>
     </div>
     <div>
       <div class="hi-title">Create an Earth Colour Palette</div>
-      <p class="hi-text">Create a colour palette using named geographic colours. Hover any table row and click <strong>+</strong> to add a colour. Or click a map marker, then use <strong>+ Add to palette</strong> in the info panel. The tray opens automatically along the bottom of the screen.<br><br>Drag chips to reorder. Use the <strong>Sort</strong> buttons to arrange by hue, saturation, brightness, or luminance. Hover a chip to reveal the <strong>&times;</strong> remove button. <strong>Clear</strong> empties the palette.</p>
+      <p class="hi-text">Hover any table row and click <strong>+</strong> to add a colour. Or click a map marker, then use <strong>+ Add to palette</strong> in the info panel. The tray opens along the bottom of the screen. Drag colour chips to reorder. Use the <strong>Sort</strong> buttons to arrange by hue, saturation, brightness, or luminance. Hover a chip to reveal the <strong>&times;</strong> remove button. <strong>Clear</strong> empties the palette.</p>
     </div>
     <div>
       <div class="hi-title">Cartographic Colour Ramp Generator</div>
-      <p class="hi-text">Create map colour gradients. Add desired colours to palette — at least <strong>2</strong> for a sequential colour scheme (e.g. &#x2018;high&#x2019; to &#x2018;low&#x2019;), <strong>3</strong> for diverging (e.g. &#x2018;hot&#x2019;, &#x2018;cold&#x2019;, &#x2018;neutral&#x2019;). The ramp interpolates additional classes through <strong>CIELAB colour space</strong>, which matches human perception well for cartographic gradients. Choose 3&#x2013;11 classes. Export as <strong>CSV</strong> (hex, RGB, HSV per step), <strong>PNG</strong> for image use, <strong>QGIS XML</strong> to import directly as a colour ramp, or <strong>CSS gradient</strong> for web maps.</p>
+      <p class="hi-text">To create map colour gradients, add desired colours to palette — at least <strong>2</strong> for a sequential colour scheme (e.g. &#x2018;high&#x2019; to &#x2018;low&#x2019;), <strong>3</strong> for diverging (e.g. &#x2018;hot&#x2019;, &#x2018;cold&#x2019;, &#x2018;neutral&#x2019;). The ramp interpolates additional classes through <strong>CIELAB colour space</strong>, which matches human perception well for cartographic gradients.Choose 3&#x2013;11 classes. Export as <strong>CSV</strong> (hex, RGB, HSV), <strong>PNG</strong>, <strong>QGIS XML</strong>, or <strong>CSS gradient</strong>.</p>
     </div>
   </div>
 </div>
@@ -378,12 +380,12 @@ tbody tr:hover .add-pal{display:inline-block}
   <div class="credits-inner">
     <div>
       <div class="cr-title">Sources</div>
-      <p class="cr-text">Colour names and hex values are compiled from <em>A Dictionary of Color</em> by Maerz &amp; Paul (McGraw-Hill, 1930); <em>Methuen Handbook of Colour</em> by Kornerup &amp; Wanscher (3rd ed., 1978); <em>Color Standards and Color Nomenclature</em> by Robert Ridgway (1912); Winsor &amp; Newton historical pigment catalogues; Werner&#x2019;s <em>Nomenclature of Colours</em> (1814); the W3C CSS Color Module Level 4 specification; and the broader art-historical literature on named pigments and dyes. This is a curated rather than definitive list of named geographic colours. Geographic coordinates are approximate centroids from OpenStreetMap / Natural Earth.</p>
+      <p class="cr-text">This list of geographic colours is compiled from two sources. First, colours with individual Wikipedia articles or entries on the <a href="https://en.wikipedia.org/wiki/List_of_colors_(alphabetical)"target="_blank" rel="noopener">Wikipedia list of colors</a>, which provide stable published references for colour name and value. Second, it uses historically documented geographic colour names from three classic dictionaries indexed and digitized at Jaffer's<a href="https://people.csail.mit.edu/jaffer/Color/Dictionaries"target="_blank" rel="noopener">Color-Name Dictionaries: <em>A Dictionary of Color</a></em> by Maerz &amp; Paul (McGraw-Hill, 1930), <em>Color Standards and Color Nomenclature</em> by Robert Ridgway (Smithsonian, 1912), and the Plochere Color System (1948). Names compiled from these sources are mapped to the 267 colour centroids developed by NBS/ISCC (Kelly and Judd,1976). The result is a curated and subjective rather than exhaustive collection of geographic colours. Geographic coordinates are approximate centroids from OpenStreetMap / Natural Earth.</p>
     </div>
     <div>
       <div class="cr-title">Methodology &amp; notes</div>
-      <p class="cr-text">Hex values are representative sRGB approximations &#x2014; historical pigments exist in varied formulations and the values here reflect common modern reference renderings, not a single authoritative standard. Archaic, trade, and colonial-era designations carry historical and cultural complexity; their inclusion is documentary, not an endorsement of the naming conventions of any period. HSV values are computed from the hex representations. Some geographic locations appear more than once where distinct pigment formulations are documented.</p>
-      <div class="cr-attr">Created by <a href="https://jcinnamon.github.io/" target="_blank" rel="noopener">Jonathan Cinnamon</a> (<a href="https://ccgs.ok.ubc.ca/about/contact/jonathan-cinnamon/" target="_blank" rel="noopener">UBC CCGS</a>), 2026.</div>
+      <p class="cr-text">Hex values are taken from the Color-Name Dictionaries where available since they are matched from physical samples from source dctionaries. Wikipedia-only entries retain the values published in their articles. Historical pigments were variable in formulation and the values here are representative, not authoritative. HSV and luminance values are derived from the hex representations. Many of these colour names carry archaic, trade, and colonial-era associations and their inclusion here is merely documentary. Colours are grouped into five types: city, region, country, water body, and pigment &amp; earth source. Where multiple colours share a location, map markers are offset to avoid symbol overlap.</p>
+      <div class="cr-attr">Created by<a href="https://jcinnamon.github.io/" target="_blank" rel="noopener">Jonathan Cinnamon</a> (<a href="https://ccgs.ok.ubc.ca/about/contact/jonathan-cinnamon/" target="_blank" rel="noopener">UBC Okanagan</a>), 2026.</div>
     </div>
   </div>
 </div>
@@ -394,246 +396,257 @@ tbody tr:hover .add-pal{display:inline-block}
   <div class="fb-spacer"></div>
   <button class="fb-cred" id="credBtn" onclick="toggleCredits()">Credits &amp; methodology &#x25BE;</button>
   <div class="fb-sep"></div>
-  <span class="fb-attr">Created by <a href="https://jcinnamon.github.io/" target="_blank" rel="noopener">Jonathan Cinnamon</a> &middot; <a href="https://ccgs.ok.ubc.ca/about/contact/jonathan-cinnamon/" target="_blank" rel="noopener">@ UBC Okanagan</a> &middot; 2026</span>
+  <span class="fb-attr">Created by<a href="https://jcinnamon.github.io/" target="_blank" rel="noopener">Jonathan Cinnamon</a> &middot; <a href="https://ccgs.ok.ubc.ca/about/contact/jonathan-cinnamon/" target="_blank" rel="noopener">@ UBC Okanagan</a> &middot; 2026</span>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const RAW=[
-["Venetian Red","#C80815","Venice","Veneto, Italy","city",45.44,12.33],
-["Venetian Green","#00827F","Venice","Veneto, Italy","city",45.46,12.35],
-["Venetian Lake","#8A3030","Venice","Veneto, Italy","city",45.42,12.31],
-["Sienna","#A0522D","Siena","Tuscany, Italy","city",43.32,11.33],
-["Burnt Sienna","#E97451","Siena","Tuscany, Italy","city",43.34,11.35],
-["Naples Yellow","#FADA5E","Naples (Napoli)","Campania, Italy","city",40.85,14.27],
-["Magenta","#FF00FF","Magenta","Lombardy, Italy","city",45.46,8.88],
-["Pompeian Red","#B22222","Pompeii","Campania, Italy","city",40.75,14.49],
-["Capri Blue","#00BFFF","Capri","Campania, Italy","city",40.55,14.24],
-["Pozzuoli Red","#CF3721","Pozzuoli","Campania, Italy","city",40.82,14.12],
-["Florentine","#C4A263","Florence (Firenze)","Tuscany, Italy","city",43.77,11.26],
-["Tyrian Purple","#66023C","Tyre (Sur)","Lebanon","city",33.27,35.20],
-["Oxford Blue","#002147","Oxford","England, UK","city",51.75,-1.26],
-["Cambridge Blue","#A3C1AD","Cambridge","England, UK","city",52.20,0.12],
-["Eton Blue","#96C8A2","Eton","England, UK","city",51.49,-0.61],
-["Lincoln Green","#195905","Lincoln","England, UK","city",53.23,-0.54],
-["Windsor Tan","#A75502","Windsor","England, UK","city",51.48,-0.63],
-["Kendal Green","#3C6B2A","Kendal","Cumbria, England","city",54.32,-2.74],
-["Chelsea Green","#4A7C59","Chelsea","London, England","city",51.49,-0.17],
-["Brunswick Green","#1B4D3E","Brunswick (Braunschweig)","Lower Saxony, Germany","city",52.27,10.52],
-["Cologne Earth","#4E3012","Cologne (Koln)","NRW, Germany","city",50.94,6.96],
-["Dresden Blue","#3F72AF","Dresden","Saxony, Germany","city",51.05,13.74],
-["Antwerp Blue","#3D70A9","Antwerp (Antwerpen)","Flanders, Belgium","city",51.22,4.40],
-["Delft Blue","#003E5C","Delft","South Holland, Netherlands","city",52.01,4.36],
-["Bordeaux","#5C0120","Bordeaux","Nouvelle-Aquitaine, France","city",44.84,-0.58],
-["Paris Green","#50C878","Paris","Ile-de-France, France","city",48.85,2.35],
-["Sevres Blue","#5E8EB1","Sevres","Ile-de-France, France","city",48.82,2.22],
-["Cordovan","#893F45","Cordoba","Andalusia, Spain","city",37.89,-4.78],
-["Seville Orange","#F57622","Seville (Sevilla)","Andalusia, Spain","city",37.39,-5.99],
-["Granada Red","#8B1818","Granada","Andalusia, Spain","city",37.18,-3.60],
-["Bruges Blue","#2E4A7A","Bruges (Brugge)","Flanders, Belgium","city",51.21,3.22],
-["Smyrna Brown","#795548","Smyrna (Izmir)","Aegean Turkey","city",38.42,27.14],
-["Dubrovnik Blue","#1A5882","Dubrovnik","Dalmatia, Croatia","city",42.65,18.09],
-["Havana","#7B3F00","Havana (La Habana)","Cuba","city",23.13,-82.38],
-["Rio Blue","#00B5E2","Rio de Janeiro","Brazil","city",-22.90,-43.17],
-["Lima Gold","#C6A840","Lima","Peru","city",-12.05,-77.04],
-["Santiago Blue","#1A5276","Santiago","Chile","city",-33.46,-70.65],
-["Buenos Aires Blue","#2E4482","Buenos Aires","Argentina","city",-34.61,-58.38],
-["Bogota Green","#3A5A40","Bogota","Colombia","city",4.71,-74.07],
-["Tangerine","#F28500","Tangier (Tanger)","Morocco","city",35.76,-5.80],
-["Zanzibar Gold","#F4B942","Zanzibar City","Tanzania","city",-6.16,39.20],
-["Marrakech Red","#B5451B","Marrakech","Morocco","city",31.63,-8.01],
-["Cairo Sand","#C8A97E","Cairo (Al-Qahirah)","Egypt","city",30.05,31.24],
-["Carthage Red","#9B2335","Carthage","Tunisia","city",36.86,10.34],
-["Timbuktu Gold","#C8A060","Timbuktu","Mali","city",16.77,-3.01],
-["Damascus Rose","#AA4466","Damascus (Dimashq)","Syria","city",33.51,36.29],
-["Petra Rose","#D9785A","Petra","Jordan","city",30.33,35.48],
-["Samarkand Blue","#2F6690","Samarkand","Uzbekistan","city",39.65,66.96],
-["Kabul Brown","#8B6040","Kabul","Afghanistan","city",34.52,69.18],
-["Lhasa Red","#992B2B","Lhasa","Tibet, China","city",29.65,91.13],
-["Ulaanbaatar Ochre","#B8860B","Ulaanbaatar","Mongolia","city",47.92,106.92],
-["Kyoto Grey","#8B8589","Kyoto","Japan","city",35.01,135.77],
-["Canton Red","#C7372F","Canton (Guangzhou)","Guangdong, China","city",23.13,113.26],
-["Peking Blue","#154360","Peking (Beijing)","China","city",39.91,116.39],
-["Nanking Yellow","#F5DEB3","Nanking (Nanjing)","Jiangsu, China","city",32.06,118.80],
-["Hong Kong Blue","#4A90D9","Hong Kong","China SAR","city",22.32,114.17],
-["Seoul Blue","#3D6EA5","Seoul","South Korea","city",37.57,126.98],
-["Madras Red","#C0392B","Madras (Chennai)","Tamil Nadu, India","city",13.08,80.27],
-["Bombay Brown","#B5651D","Bombay (Mumbai)","Maharashtra, India","city",19.08,72.88],
-["Calcutta Green","#4E8B57","Calcutta (Kolkata)","West Bengal, India","city",22.57,88.36],
-["Manila Yellow","#F5E784","Manila","Luzon, Philippines","city",14.60,120.98],
-["Nairobi Green","#2D6A4F","Nairobi","Kenya","city",-1.29,36.82],
-["Accra Gold","#C8A020","Accra","Ghana","city",5.55,-0.20],
-["Lagos Orange","#E05D04","Lagos","Nigeria","city",6.52,3.38],
-["Cape Town Blue","#1B7FBD","Cape Town","Western Cape, South Africa","city",-33.93,18.42],
-["Alexandria Blue","#2E87C1","Alexandria","Egypt","city",31.20,29.92],
-["Sydney Blue","#0073A8","Sydney","New South Wales, Australia","city",-33.87,151.21],
-["Melbourne Grey","#6E7F8D","Melbourne","Victoria, Australia","city",-37.81,144.96],
-["Auckland Blue","#2471A3","Auckland","New Zealand","city",-36.87,174.77],
-["Prussian Blue","#003153","Prussia","Historical N. European state","region",52.50,13.40],
-["Saxe Blue","#4F69C6","Saxony (Sachsen)","Germany","region",51.10,13.20],
-["Raw Umber","#826644","Umbria","Central Italy","region",43.11,12.39],
-["Burnt Umber","#8A3324","Umbria","Central Italy","region",43.09,12.37],
-["Tuscan Red","#7C3030","Tuscany (Toscana)","Italy","region",43.77,11.25],
-["Tuscan Yellow","#E1A95F","Tuscany (Toscana)","Italy","region",43.79,11.27],
-["Burgundy","#800020","Burgundy (Bourgogne)","France","region",47.05,4.84],
-["Champagne","#F7E7CE","Champagne","France","region",49.00,4.00],
-["Chartreuse","#7FFF00","Chartreuse","Dauphine, France","region",45.37,5.72],
-["Normandy Grey","#8A9198","Normandy","France","region",49.00,0.50],
-["Alsace Gold","#D4A520","Alsace","France","region",48.30,7.50],
-["Flanders Brown","#6B4F3A","Flanders","Belgium","region",51.00,3.50],
-["Bohemian Green","#3B6E3A","Bohemia","Czech Republic","region",50.08,14.43],
-["Catalonia Red","#CC1018","Catalonia","Spain","region",41.70,1.80],
-["Caledonian Blue","#4370A4","Caledonia","Scotland, UK","region",57.50,-4.00],
-["Lapland Blue","#89BFDE","Lapland","Scandinavia","region",68.00,26.00],
-["Siberia White","#E8E4D8","Siberia","Russia","region",60.00,100.00],
-["Dalmatia Blue","#1A6496","Dalmatia","Croatia","region",43.50,17.00],
-["Californian Gold","#D4A017","California","USA","region",37.00,-120.00],
-["Carolina Blue","#57A0D2","Carolinas","USA","region",35.75,-79.02],
-["Georgia Peach","#FFCBA4","Georgia","USA","region",32.16,-82.90],
-["Yukon Gold","#C5930A","Yukon","Canada","region",63.00,-135.00],
-["Patagonian Blue","#4A7FA5","Patagonia","Argentina / Chile","region",-45.00,-69.00],
-["Kashmir Blue","#4E6E9C","Kashmir","India / Pakistan","region",34.00,76.00],
-["Punjab Gold","#CFA020","Punjab","India / Pakistan","region",30.90,75.85],
-["Rajasthan Pink","#C86050","Rajasthan","India","region",27.00,73.00],
-["Bengal Green","#3B6E5A","Bengal","India / Bangladesh","region",23.00,89.00],
-["Deccan Brown","#8B6547","Deccan Plateau","India","region",17.00,76.00],
-["Tibet Red","#B03060","Tibet (Xizang)","China","region",31.00,88.00],
-["Szechuan Red","#AA2B2B","Sichuan","China","region",30.70,104.07],
-["Manchurian Brown","#7B5635","Manchuria","Northeast China","region",46.00,126.00],
-["Yunnan Green","#3A5F42","Yunnan","China","region",24.50,101.50],
-["Java Brown","#5B4A42","Java (Jawa)","Indonesia","region",-7.60,110.65],
-["Natal Brown","#D79762","Natal","KwaZulu-Natal, South Africa","region",-29.60,30.38],
-["Mesopotamia Gold","#C8A060","Mesopotamia","Iraq","region",33.00,44.00],
-["Levant Blue","#2E75B6","Levant","Eastern Mediterranean","region",33.50,36.00],
-["Maghreb Red","#C03020","Maghreb","North Africa","region",33.00,2.00],
-["Masai Red","#B03830","Masai Mara","Kenya / Tanzania","region",-1.40,35.00],
-["Pampas Green","#5A8A50","Pampas","Argentina","region",-34.00,-62.00],
-["Egyptian Blue","#1034A6","Egypt","North Africa","country",26.00,30.00],
-["Persian Blue","#1C39BB","Persia (Iran)","Middle East","country",32.00,53.00],
-["Persian Orange","#D99058","Persia (Iran)","Middle East","country",32.20,53.20],
-["Persian Red","#CC3333","Persia (Iran)","Middle East","country",31.80,52.80],
-["Persian Green","#00A693","Persia (Iran)","Middle East","country",32.10,53.10],
-["Persian Rose","#FE28A2","Persia (Iran)","Middle East","country",31.90,52.90],
-["Turquoise","#40E0D0","Turkey (Turkiye)","Anatolia","country",39.00,35.00],
-["Turkey Red","#A91101","Turkey (Turkiye)","Anatolia","country",39.20,35.20],
-["Turkish Blue","#00B1D3","Turkey (Turkiye)","Anatolia","country",38.80,34.80],
-["Indigo","#4B0082","India (Indus Valley)","South Asia","country",20.00,77.00],
-["Indian Red","#CD5C5C","India","South Asia","country",20.20,77.20],
-["Indian Yellow","#E3A857","India","South Asia","country",19.80,76.80],
-["Chinese Red","#AA381E","China","East Asia","country",35.00,105.00],
-["Chinese Violet","#856088","China","East Asia","country",35.20,105.20],
-["Japanese Violet","#5B3256","Japan","East Asia","country",36.20,138.25],
-["Maya Blue","#73C2FB","Maya Civilization","Mesoamerica","country",17.00,-92.00],
-["Aztec Gold","#C39953","Aztec Empire","Mesoamerica","country",19.43,-99.13],
-["Inca Gold","#C68642","Inca Empire","Andean South America","country",-13.16,-72.54],
-["Gamboge","#E49B0F","Cambodia (Gambogia)","Southeast Asia","country",12.57,104.99],
-["Siamese","#FFB75E","Siam (Thailand)","Southeast Asia","country",15.00,101.00],
-["Moroccan Red","#C1272D","Morocco","North Africa","country",32.00,-5.00],
-["Mexican Pink","#E4007C","Mexico","North America","country",23.63,-102.55],
-["Ceylon Blue","#3B7A8E","Ceylon (Sri Lanka)","South Asia","country",7.87,80.77],
-["Dutch Orange","#FF6600","Netherlands","Western Europe","country",52.37,4.90],
-["Irish Green","#009A44","Ireland","Western Europe","country",53.35,-6.26],
-["Swedish Blue","#006AA7","Sweden","Scandinavia","country",59.33,18.07],
-["Spanish Red","#C60B1E","Spain","Iberian Peninsula","country",40.42,-3.70],
-["Portuguese Blue","#005DAA","Portugal","Iberian Peninsula","country",38.72,-9.14],
-["Nubian Brown","#905D3D","Nubia","Egypt / Sudan","country",21.00,33.00],
-["Abyssinian Green","#4B6B43","Abyssinia (Ethiopia)","East Africa","country",8.00,38.00],
-["Rhodesian Green","#4C6A30","Rhodesia (Zimbabwe)","Southern Africa","country",-20.00,30.00],
-["Adriatic Blue","#3E6694","Adriatic Sea","Mediterranean Europe","water",43.00,16.00],
-["Mediterranean Blue","#006994","Mediterranean Sea","Europe / North Africa","water",35.00,18.00],
-["Aegean Blue","#4D82B8","Aegean Sea","Greece / Turkey","water",38.00,25.00],
-["Caribbean Blue","#00B7EB","Caribbean Sea","Central America / Caribbean","water",15.00,-75.00],
-["Pacific Blue","#1CA9C9","Pacific Ocean","Global","water",0.00,-160.00],
-["Atlantic Blue","#235F9C","Atlantic Ocean","Global","water",20.00,-30.00],
-["Baltic Blue","#1D6FA4","Baltic Sea","Northern Europe","water",58.50,20.00],
-["Caspian Blue","#2E86AB","Caspian Sea","Central Asia","water",41.50,51.00],
-["Arctic Blue","#89CFF0","Arctic Ocean","North Polar region","water",85.00,0.00],
-["Red Sea Blue","#2C85A8","Red Sea","Middle East / East Africa","water",20.00,38.00],
-["Black Sea Blue","#1A5276","Black Sea","Southeastern Europe","water",43.00,34.00],
-["Yellow Sea Blue","#3A8FBF","Yellow Sea","East Asia","water",35.00,122.00],
-["Persian Gulf Blue","#1B7FBD","Persian Gulf","Middle East","water",26.00,52.00],
-["Arabian Blue","#006B8A","Arabian Sea","Indian Ocean","water",15.00,65.00],
-["Tasman Blue","#2E75B6","Tasman Sea","Australasia","water",-40.00,158.00],
-["Drake Blue","#1A4E7A","Drake Passage","Southern Ocean","water",-57.00,-65.00],
-["Nile Blue","#19597D","Nile River","Egypt / Sudan","water",26.00,32.00],
-["Nile Green","#69A189","Nile River","Egypt / Sudan","water",25.80,31.80],
-["Amazon Green","#3B7A57","Amazon River","South America","water",-3.00,-60.00],
-["Congo Brown","#5C4033","Congo River","Central Africa","water",-4.00,15.30],
-["Ganges Blue","#3A7CA5","Ganges (Ganga) River","India","water",25.00,83.00],
-["Danube Blue","#2D5F8A","Danube River","Central Europe","water",47.50,19.00],
-["Rhine Blue","#4B7AA5","Rhine River","Central Europe","water",51.00,7.00],
-["Mississippi Brown","#6B4F3A","Mississippi River","USA","water",33.00,-90.00],
-["Orinoco Green","#4A7C59","Orinoco River","Venezuela","water",7.00,-64.00],
-["Volga Blue","#2C5F8A","Volga River","Russia","water",55.00,50.00],
-["Ob Blue","#2C7BB5","Ob River","Russia","water",63.00,69.00],
-["Lena Blue","#2E70B0","Lena River","Siberia, Russia","water",65.00,126.00],
-["Tigris Brown","#8B6914","Tigris River","Iraq / Turkey","water",36.00,43.00],
-["Euphrates Brown","#9B7653","Euphrates River","Iraq / Syria","water",34.00,43.20],
-["Mekong Blue","#2980B9","Mekong River","Southeast Asia","water",20.00,102.00],
-["Irrawaddy Brown","#8B6547","Irrawaddy River","Myanmar","water",20.00,94.00],
-["Niger Brown","#784421","Niger River","West Africa","water",13.00,4.00],
-["Zambezi Blue","#2E75B6","Zambezi River","Southern Africa","water",-15.00,30.10],
-["Colorado Brown","#8B5A2B","Colorado River","USA","water",36.00,-112.00],
-["Mackenzie Blue","#2C5F8A","Mackenzie River","Canada","water",66.00,-128.00],
-["Hudson Blue","#4A80B5","Hudson River","New York, USA","water",42.00,-73.90],
-["Murray Blue","#3070A8","Murray River","Australia","water",-34.60,139.39],
-["Indus Blue","#2E5E8E","Indus River","Pakistan / India","water",28.00,69.00],
-["Yangtze Blue","#2275AA","Yangtze River","China","water",31.00,110.00],
-["Jordan Blue","#3A7CA5","Jordan River","Middle East","water",32.00,35.56],
-["Tiber Brown","#7B5E3A","Tiber (Tevere) River","Italy","water",41.90,12.45],
-["Limpopo Brown","#8B7355","Limpopo River","Southern Africa","water",-24.50,33.50],
-["Bosphorus Blue","#1A5276","Bosphorus Strait","Turkey","water",41.12,29.07],
-["Aral Blue","#2573B5","Aral Sea","Central Asia","water",45.00,60.00],
-["Baikal Blue","#0A3D62","Lake Baikal","Russia","water",53.50,108.00],
-["Superior Blue","#1A6496","Lake Superior","USA / Canada","water",47.50,-85.00],
-["Victoria Blue","#0E6FA8","Lake Victoria","East Africa","water",-1.00,33.00],
-["Tanganyika Blue","#0D6986","Lake Tanganyika","East Africa","water",-6.00,29.60],
-["Titicaca Blue","#2E86C1","Lake Titicaca","Peru / Bolivia","water",-15.85,-69.33],
-["Okavango Green","#4A7C59","Okavango Delta","Botswana","water",-19.50,23.00],
-["Alpine White","#EAE7DC","Alps","Central Europe","landform",46.50,9.50],
-["Dolomite White","#F2EFE4","Dolomites","Northern Italy","landform",46.40,11.85],
-["Pyrenean Grey","#8B9196","Pyrenees","France / Spain","landform",42.80,0.50],
-["Carpathian Green","#3B6B3A","Carpathians","Central Europe","landform",49.00,22.00],
-["Himalayan Blue","#6B8E9F","Himalayas","South / Central Asia","landform",28.00,84.00],
-["Hindu Kush","#7B5A3A","Hindu Kush","Afghanistan / Pakistan","landform",35.50,71.00],
-["Pamir Brown","#7B5635","Pamir Mountains","Tajikistan","landform",38.50,74.00],
-["Tian Shan Blue","#3A6EA5","Tian Shan","Central Asia","landform",42.00,80.00],
-["Atlas Brown","#8B6040","Atlas Mountains","Morocco / Algeria","landform",32.00,-1.50],
-["Drakensberg Green","#4A7450","Drakensberg","South Africa","landform",-29.50,29.50],
-["Andean Green","#4F7942","Andes","South America","landform",-20.00,-68.00],
-["Appalachian Green","#5C6E3E","Appalachian Mountains","Eastern USA","landform",37.00,-82.00],
-["Rocky Mountain Blue","#2E6DA4","Rocky Mountains","North America","landform",47.00,-113.00],
-["Caucasian Grey","#8B8589","Caucasus Mountains","Europe / Asia","landform",42.50,44.00],
-["Saharan Sand","#F4A460","Sahara Desert","North Africa","landform",23.00,12.00],
-["Atacama Sand","#C2A664","Atacama Desert","Chile / Peru","landform",-24.00,-69.00],
-["Gobi Sand","#D9B48F","Gobi Desert","Mongolia / China","landform",42.00,103.00],
-["Namib Ochre","#CC7722","Namib Desert","Namibia","landform",-24.00,15.00],
-["Kalahari Red","#C65B3B","Kalahari Desert","Southern Africa","landform",-24.00,22.00],
-["Rub al-Khali Sand","#D4A055","Rub al-Khali","Arabian Peninsula","landform",21.00,51.00],
-["Taklamakan Sand","#D4B068","Taklamakan Desert","Xinjiang, China","landform",38.00,83.00],
-["Mojave Sand","#C2B280","Mojave Desert","USA","landform",35.00,-116.00],
-["Sonoran Sand","#C2A47A","Sonoran Desert","USA / Mexico","landform",31.50,-112.00],
-["Outback Red","#A05C34","Australian Outback","Australia","landform",-25.00,134.00],
-["Uluru Red","#C1440E","Uluru (Ayers Rock)","Northern Territory, Australia","landform",-25.34,131.04],
-["Nullarbor Grey","#C4BBAC","Nullarbor Plain","Australia","landform",-31.50,126.00],
-["Cape Blue","#0059A3","Cape of Good Hope","South Africa","landform",-34.36,18.47],
-["Tibetan Blue","#3B6EA5","Tibetan Plateau","China","landform",32.00,90.00],
-["Sinai Gold","#C9A85C","Sinai Peninsula","Egypt","landform",29.50,33.90],
-["Vesuvian Brown","#734A12","Mt. Vesuvius","Campania, Italy","landform",40.82,14.43],
-["Fuji White","#F9F4EE","Mt. Fuji","Honshu, Japan","landform",35.36,138.73],
-["Kilimanjaro White","#EDE8DF","Mt. Kilimanjaro","Tanzania","landform",-3.07,37.35],
-["Hawaiian Lava","#1C1C1C","Hawaiian Islands","Pacific, USA","landform",20.80,-156.30],
-["Icelandic Grey","#B0A9A0","Iceland","North Atlantic","landform",64.96,-19.02],
-["Serengeti Gold","#DAA520","Serengeti Plain","Tanzania","landform",-2.33,34.83],
-["Pantanal Green","#3A7A50","Pantanal","Brazil / Bolivia","landform",-17.00,-57.50],
-["Amazonian Green","#2ECC71","Amazon Basin","South America","landform",-5.00,-55.00],
-["Patagonian Steppe","#9C7A3C","Patagonian Steppe","South America","landform",-47.00,-70.00],
-["Sahel Brown","#9C7A3C","Sahel","West Africa","landform",14.20,-2.00],
-["Siberian Taiga","#2D6A4F","Siberian Taiga","Russia","landform",58.00,80.00],
-["Pampas Green","#5A8A50","Pampas","Argentina","landform",-34.00,-62.00],
-["Lapis Lazuli","#26619C","Badakhshan","Afghanistan","region",36.70,71.30],
-["Carmine","#960018","Oaxaca","Mexico","region",17.07,-96.73],
-["Vermilion","#E34234","Almadén","Castilla-La Mancha, Spain","city",38.77,-4.83]
+    ["Alexandria Blue","#00A1C2","Alexandria","Egypt","city",31.2,29.92]
+    ["Algiers Blue","#367588","Algiers","Algeria","city",36.75,3.04]
+    ["Antwerp Blue","#2E8495","Antwerp (Antwerpen)","Flanders, Belgium","city",51.22,4.4]
+    ["Berlin Brown","#905D5D","Berlin","Germany","city",52.52,13.4]
+    ["Bombay","#80461B","Bombay (Mumbai)","Maharashtra, India","city",19.08,72.88]
+    ["Bordeaux","#673147","Bordeaux","Nouvelle-Aquitaine, France","city",44.84,-0.58,"https://en.wikipedia.org/wiki/Bordeaux_(color)"]
+    ["Bruges","#004958","Bruges (Brugge)","Flanders, Belgium","city",51.21,3.22]
+    ["Deep Brunswick Green","#1B4D3E","Brunswick (Braunschweig)","Lower Saxony, Germany","city",52.27,10.52]
+    ["Cairo","#00416A","Cairo (Al-Qahirah)","Egypt","city",30.05,31.24]
+    ["Cambridge Blue","#66ADA4","Cambridge","England, UK","city",52.2,0.12]
+    ["Cambridge Red","#AB4E52","Cambridge","England, UK","city",52.2,0.12]
+    ["Canton","#317873","Canton (Guangzhou)","Guangdong, China","city",23.13,113.26]
+    ["Canton Jade","#317873","Canton (Guangzhou)","Guangdong, China","city",23.13,113.26]
+    ["Capri Blue","#367588","Capri","Campania, Italy","city",40.55,14.24]
+    ["Cologne Yellow","#D4AF37","Cologne (K\u00f6ln)","NRW, Germany","city",50.94,6.96]
+    ["Cordovan","#483C32","Cordoba","Andalusia, Spain","city",37.89,-4.78,"https://en.wikipedia.org/wiki/Cordovan_(color)"]
+    ["Delft Blue","#4C516D","Delft","South Holland, Netherlands","city",52.01,4.36]
+    ["Dresden Brown","#826644","Dresden","Saxony, Germany","city",51.05,13.74]
+    ["Eton Blue","#66ADA4","Eton","England, UK","city",51.49,-0.61]
+    ["Florentine","#E25822","Florence (Firenze)","Tuscany, Italy","city",43.77,11.26]
+    ["Kyoto","#F88379","Kyoto","Japan","city",35.01,135.77]
+    ["Lincoln Green","#195905","Lincoln","England, UK","city",53.23,-0.54,"https://en.wikipedia.org/wiki/Lincoln_Green"]
+    ["Madrid","#635147","Madrid","Spain","city",40.42,-3.7]
+    ["Magenta","#FF00FF","Magenta","Lombardy, Italy","city",45.46,8.88,"https://en.wikipedia.org/wiki/Magenta"]
+    ["Manila","#C19A6B","Manila","Luzon, Philippines","city",14.6,120.98]
+    ["Naples Yellow","#F8DE7E","Naples (Napoli)","Campania, Italy","city",40.85,14.27,"https://en.wikipedia.org/wiki/Naples_yellow"]
+    ["Oxford Blue","#291E29","Oxford","England, UK","city",51.75,-1.26]
+    ["Paris Green","#3EB489","Paris","Ile-de-France, France","city",48.85,2.35,"https://en.wikipedia.org/wiki/Paris_green"]
+    ["Paris Mud","#543D3F","Paris","\u00cele-de-France, France","city",48.85,2.35]
+    ["Parma Red","#BC3F4A","Parma","Emilia-Romagna, Italy","city",44.8,10.33]
+    ["Pompeian Red","#B22222","Pompeii","Campania, Italy","city",40.75,14.49,"https://en.wikipedia.org/wiki/Pompeian_red"]
+    ["Pompeii","#56070C","Pompeii","Campania, Italy","city",40.75,14.49]
+    ["Rio Blue","#91A3B0","Rio de Janeiro","Brazil","city",-22.9,-43.17]
+    ["Seville Orange","#D99058","Seville (Sevilla)","Andalusia, Spain","city",37.39,-5.99]
+    ["Tangerine","#CB6D51","Tangier (Tanger)","Morocco","city",35.76,-5.8]
+    ["Tangier","#ED872D","Tangier (Tanger)","Morocco","city",35.76,-5.8]
+    ["Tokyo","#FFB7A5","Tokyo","Japan","city",35.68,139.69]
+    ["Venetian Red","#C80815","Venice","Veneto, Italy","city",45.44,12.33,"https://en.wikipedia.org/wiki/Venetian_red"]
+    ["Venetian Blue","#007791","Venice (Venezia)","Veneto, Italy","city",45.44,12.33]
+    ["Venetian Pink","#DEA5A4","Venice (Venezia)","Veneto, Italy","city",45.44,12.33]
+    ["Venetian Rose","#841B2D","Venice (Venezia)","Veneto, Italy","city",45.44,12.33]
+    ["Venetian Yellow","#F8DE7E","Venice (Venezia)","Veneto, Italy","city",45.44,12.33]
+    ["Verona Yellow","#FADA5E","Verona","Veneto, Italy","city",45.44,10.99]
+    ["Vienna Blue","#007791","Vienna (Wien)","Austria","city",48.21,16.37]
+    ["Vienna Brown","#635147","Vienna (Wien)","Austria","city",48.21,16.37]
+    ["Vienna Green","#3EB489","Vienna (Wien)","Austria","city",48.21,16.37]
+    ["Vienna Smoke","#555555","Vienna (Wien)","Austria","city",48.21,16.37]
+    ["Clear Windsor Blue","#8791BF","Windsor","England, UK","city",51.48,-0.63]
+    ["Windsor","#563C5C","Windsor","England, UK","city",51.48,-0.63]
+    ["Zanzibar","#43302E","Zanzibar City","Tanzania","city",-6.16,39.2]
+    ["Aztec","#996515","Aztec Empire","Mesoamerica","region",19.43,-99.13]
+    ["Bavarian Blue","#00304E","Bavaria (Bayern)","Germany","region",48.79,11.5]
+    ["Burgundy","#50404D","Burgundy (Bourgogne)","France","region",47.05,4.84,"https://en.wikipedia.org/wiki/Burgundy_(color)"]
+    ["Old Burgundy","#3E1D1E","Burgundy (Bourgogne)","France","region",47.05,4.84]
+    ["Byzantine","#CE4676","Byzantine Empire","Eastern Mediterranean","region",41.01,28.98]
+    ["California Gold","#E3A857","California","USA","region",37.0,-120.0]
+    ["California Green","#A18F60","California","USA","region",37.0,-120.0]
+    ["Carolina Blue","#57A0D2","Carolinas","USA","region",35.75,-79.02]
+    ["Champagne","#FAD6A5","Champagne","France","region",49.0,4.0,"https://en.wikipedia.org/wiki/Champagne_(color)"]
+    ["Chartreuse","#E9E450","Chartreuse","Dauphine, France","region",45.37,5.72,"https://en.wikipedia.org/wiki/Chartreuse_(color)"]
+    ["Java","#422518","Java (Jawa)","Indonesia","region",-7.6,110.65]
+    ["Kashmir","#355E3B","Kashmir","India / Pakistan","region",34.0,76.0]
+    ["Levant Red","#AB4E52","Levant","Eastern Mediterranean","region",33.5,36.0]
+    ["Natal Brown","#635147","Natal","KwaZulu-Natal, South Africa","region",-29.6,30.38]
+    ["Normandy","#00304E","Normandy","France","region",49.0,0.5]
+    ["Nubian","#222222","Nubia","Egypt / Sudan","region",21.0,33.0]
+    ["Rose De Provence","#B3446C","Provence","Southeast France","region",43.95,6.07]
+    ["Prussian Blue","#0067A5","Prussia","Historical N. European state","region",52.5,13.4,"https://en.wikipedia.org/wiki/Prussian_blue"]
+    ["Prussian Green","#004B49","Prussia","Historical N. European state","region",52.5,13.4]
+    ["Punjab","#BE6516","Punjab","India / Pakistan","region",30.9,75.85]
+    ["Siberian Brown","#6C541E","Siberia","Russia","region",60.0,100.0]
+    ["Tuscan Red","#79443B","Tuscany (Toscana)","Italy","region",43.77,11.25,"https://en.wikipedia.org/wiki/Tuscan_red"]
+    ["Afghan","#3E322C","Afghanistan","Central / South Asia","country",34.5,69.2]
+    ["Afghan Red","#BE0032","Afghanistan","Central / South Asia","country",34.5,69.2]
+    ["Ceylon Blue","#004958","Ceylon (Sri Lanka)","South Asia","country",7.87,80.77]
+    ["China Blue","#436B95","China","East Asia","country",35.0,105.0]
+    ["China Pink","#DE6FA1","China","East Asia","country",35.0,105.0]
+    ["China Rose","#A8516E","China","East Asia","country",35.0,105.0]
+    ["China Sea","#66AABC","China","East Asia","country",35.0,105.0]
+    ["Chinese Red","#882D17","China","East Asia","country",35.0,105.0]
+    ["Chinese Violet","#856088","China","East Asia","country",35.2,105.2]
+    ["Chinese Yellow","#E3A857","China","East Asia","country",35.0,105.0]
+    ["Old China","#536878","China","East Asia","country",35.0,105.0]
+    ["Congo Brown","#80461B","Congo (DRC)","Central Africa","country",-4.0,24.0]
+    ["Congo Pink","#B4745E","Congo (DRC)","Central Africa","country",-4.0,24.0]
+    ["Light Congo Pink","#F4C2C2","Congo (DRC)","Central Africa","country",-4.0,24.0]
+    ["Cuban Orchid","#B784A7","Cuba","Caribbean","country",22.0,-79.5]
+    ["Cuban Sand","#AE9B82","Cuba","Caribbean","country",22.0,-79.5]
+    ["English Blue","#436B95","England","United Kingdom","country",52.0,-1.2]
+    ["English Green","#1B4D3E","England","United Kingdom","country",52.0,-1.2]
+    ["English Grey","#57554C","England","United Kingdom","country",52.0,-1.2]
+    ["English Ivy","#355E3B","England","United Kingdom","country",52.0,-1.2]
+    ["English Violet","#563C5C","England","United Kingdom","country",52.0,-1.2]
+    ["Old English Brown","#483C32","England","United Kingdom","country",52.0,-1.2]
+    ["Formosa","#D99058","Formosa (Taiwan)","East Asia","country",23.7,120.96]
+    ["French Blue","#0067A5","France","Western Europe","country",46.6,2.2]
+    ["French Gray","#91A3B0","France","Western Europe","country",46.6,2.2]
+    ["French Lilac","#86608E","France","Western Europe","country",46.6,2.2]
+    ["French Maroon","#905D5D","France","Western Europe","country",46.6,2.2]
+    ["French Scarlet","#BE0032","France","Western Europe","country",46.6,2.2]
+    ["French Ultramarine","#0067A5","France","Western Europe","country",46.6,2.2]
+    ["Hungarian Blue","#436B95","Hungary","Central Europe","country",47.16,19.5]
+    ["Hungarian Green","#679267","Hungary","Central Europe","country",47.16,19.5]
+    ["Indian Purple","#673147","India","South Asia","country",20.0,77.0]
+    ["Indian Red","#79443B","India","South Asia","country",20.2,77.2,"https://en.wikipedia.org/wiki/Indian_Red"]
+    ["Indian Saffron","#F8DE7E","India","South Asia","country",20.0,77.0]
+    ["Indian Yellow","#EAA221","India","South Asia","country",19.8,76.8,"https://en.wikipedia.org/wiki/Indian_yellow"]
+    ["Indigo","#4B0082","India (Indus Valley)","South Asia","country",20.0,77.0,"https://en.wikipedia.org/wiki/Indigo"]
+    ["Irish Isle","#27A64C","Ireland","Western Europe","country",53.35,-6.26]
+    ["Italian Blue","#0085A1","Italy","Southern Europe","country",42.5,12.5]
+    ["Japan Rose","#D9A6A9","Japan","East Asia","country",36.2,138.25]
+    ["Japanese Blue","#5E716A","Japan","East Asia","country",36.2,138.25]
+    ["Japanese Violet","#5B3256","Japan","East Asia","country",36.2,138.25]
+    ["Maya Blue","#73C2FB","Maya Civilization","Mesoamerica","country",17.0,-92.0,"https://en.wikipedia.org/wiki/Maya_blue"]
+    ["Mexican Pink","#E4007C","Mexico","North America","country",23.63,-102.55]
+    ["Morocco","#3E322C","Morocco","North Africa","country",32.0,-5.0]
+    ["Morocco Red","#722F37","Morocco","North Africa","country",32.0,-5.0]
+    ["Morocco Sand","#C19A6B","Morocco","North Africa","country",32.0,-5.0]
+    ["Burmese Gold","#CB6D51","Myanmar","Southeast Asia","country",19.76,96.07]
+    ["Burmese Ruby","#722F37","Myanmar","Southeast Asia","country",19.76,96.07]
+    ["Dutch Cream","#FAD6A5","Netherlands","Western Europe","country",52.37,4.9]
+    ["Dutch Orange","#EAA221","Netherlands","Western Europe","country",52.37,4.9]
+    ["Holland Blue","#00304E","Netherlands","Western Europe","country",52.37,4.9]
+    ["Persian Blue","#4C516D","Persia (Iran)","Middle East","country",32.0,53.0,"https://en.wikipedia.org/wiki/Persian_blue"]
+    ["Persian Green","#3A4B47","Persia (Iran)","Middle East","country",32.1,53.1]
+    ["Persian Lilac","#C17E91","Persia (Iran)","Middle East","country",32.0,53.0]
+    ["Persian Melon","#B4745E","Persia (Iran)","Middle East","country",32.0,53.0]
+    ["Persian Orange","#D99058","Persia (Iran)","Middle East","country",32.2,53.2]
+    ["Persian Pink","#A8516E","Persia (Iran)","Middle East","country",32.0,53.0]
+    ["Persian Red","#882D17","Persia (Iran)","Middle East","country",31.8,52.8]
+    ["Persian Rose","#CE4676","Persia (Iran)","Middle East","country",31.9,52.9]
+    ["Persian Yellow","#E25822","Persia (Iran)","Middle East","country",32.0,53.0]
+    ["Peruvian Yellow","#CB6D51","Peru","South America","country",-12.0,-77.0]
+    ["Dark Russian Green","#5E716A","Russia","Eurasia","country",55.75,37.62]
+    ["Russian Blue","#91A3B0","Russia","Eurasia","country",55.75,37.62]
+    ["Russian Grey","#8A8776","Russia","Eurasia","country",55.75,37.62]
+    ["Russian Violet","#32174D","Russia","Eurasia","country",55.75,37.62]
+    ["Scotch Blue","#252440","Scotland","United Kingdom","country",56.49,-4.2]
+    ["Siam Sand","#C2B280","Siam (Thailand)","Southeast Asia","country",15.0,101.0]
+    ["Spanish White","#FAD6A5","Spain","Iberian Peninsula","country",40.42,-3.7]
+    ["Spanish Yellow","#EAA221","Spain","Iberian Peninsula","country",40.42,-3.7]
+    ["Swedish Green","#7E9F2E","Sweden","Scandinavia","country",59.33,18.07]
+    ["Swiss Rose","#AB4E52","Switzerland","Central Europe","country",46.95,7.45]
+    ["Turkey Red","#A91101","Turkey (Turkiye)","Anatolia","country",39.2,35.2,"https://en.wikipedia.org/wiki/Turkey_red"]
+    ["Turquoise","#40E0D0","Turkey (Turkiye)","Anatolia","country",39.0,35.0,"https://en.wikipedia.org/wiki/Turquoise"]
+    ["Turkish Blue","#4C516D","Turkey (T\u00fcrkiye)","Anatolia","country",39.0,35.0]
+    ["Turkish Crescent Red","#841B2D","Turkey (T\u00fcrkiye)","Anatolia","country",39.0,35.0]
+    ["Adriatic","#317873","Adriatic Sea","Mediterranean Europe","water",43.0,16.0]
+    ["Amazon","#3B7861","Amazon River","South America","water",-3.0,-60.0]
+    ["Arctic Blue","#536878","Arctic Ocean","North Polar region","water",85.0,0.0]
+    ["Atlantic","#36454F","Atlantic Ocean","Global","water",20.0,-30.0]
+    ["Baltic","#3A4B47","Baltic Sea","Northern Europe","water",58.5,20.0]
+    ["Bosphorus","#3A4B47","Bosphorus Strait","Turkey","water",41.12,29.07]
+    ["Congo Blue","#536878","Congo River","Central Africa","water",-4.0,15.3]
+    ["Blue Danube","#007791","Danube River","Central Europe","water",47.5,19.0]
+    ["Danube Green","#355E3B","Danube River","Central Europe","water",47.5,19.0]
+    ["Superior","#004B49","Lake Superior","USA / Canada","water",47.5,-85.0]
+    ["Victoria Blue","#0E6FA8","Lake Victoria","East Africa","water",-1.0,33.0,"https://en.wikipedia.org/wiki/Victoria_blue"]
+    ["Eau-De-Nile","#8A9A5B","Nile River","Egypt / Sudan","water",26.0,32.0]
+    ["Nile Blue","#66ADA4","Nile River","Egypt / Sudan","water",26.0,32.0,"https://en.wikipedia.org/wiki/Nile_blue"]
+    ["Pale Nile Blue","#96DED1","Nile River","Egypt / Sudan","water",26.0,32.0]
+    ["Pacific","#8DA399","Pacific Ocean","Global","water",0.0,-160.0]
+    ["Pacific Blue","#1CA9C9","Pacific Ocean","Global","water",0.0,-160.0]
+    ["Cadmium Vermilion","#BC3F4A","Almad\u00e9n","Castilla-La Mancha, Spain","pigment",38.77,-4.83]
+    ["Scarlet Vermilion","#E25822","Almad\u00e9n","Castilla-La Mancha, Spain","pigment",38.77,-4.83]
+    ["Vermilion","#D9603B","Almad\u00e9n","Castilla-La Mancha, Spain","pigment",38.77,-4.83,"https://en.wikipedia.org/wiki/Vermilion"]
+    ["Lapis Lazuli","#26619C","Badakhshan","Afghanistan","pigment",36.7,71.3,"https://en.wikipedia.org/wiki/Lapis_lazuli"]
+    ["Gamboge","#D4AF37","Cambodia (Gambogia)","Southeast Asia","pigment",12.57,104.99,"https://en.wikipedia.org/wiki/Gamboge"]
+    ["Cologne Earth","#6F4E37","Cologne (K\u00f6ln)","NRW, Germany","pigment",50.94,6.96]
+    ["Cyprus Earth","#826644","Cyprus","Eastern Mediterranean","pigment",35.13,33.43]
+    ["Ocher Red","#905D5D","Earth pigment","Global","pigment",43.32,11.33]
+    ["Egyptian Blue","#00A1C2","Egypt","North Africa","pigment",26.0,30.0,"https://en.wikipedia.org/wiki/Egyptian_blue"]
+    ["Egyptian Brown","#483C32","Egypt","North Africa","pigment",26.0,30.0]
+    ["Egyptian Green","#3B7861","Egypt","North Africa","pigment",26.0,30.0]
+    ["Egyptian Red","#722F37","Egypt","North Africa","pigment",26.0,30.0]
+    ["English Ochre","#E3A857","England","United Kingdom","pigment",52.0,-1.2]
+    ["Florence Earth","#79443B","Florence (Firenze)","Tuscany, Italy","pigment",43.77,11.26]
+    ["Burnt Italian Earth","#9E4732","Italy","Southern Europe","pigment",42.5,12.5]
+    ["Italian Ochre","#AE6938","Italy","Southern Europe","pigment",42.5,12.5]
+    ["Raw Italian Earth","#AE6938","Italy","Southern Europe","pigment",42.5,12.5]
+    ["Japan Earth","#6F4E37","Japan","East Asia","pigment",36.2,138.25]
+    ["Burnt Carmine","#841B2D","Oaxaca","Mexico","pigment",17.07,-96.73]
+    ["Carmine","#BE0032","Oaxaca","Mexico","pigment",17.07,-96.73,"https://en.wikipedia.org/wiki/Carmine"]
+    ["Violet Carmine","#673147","Oaxaca","Mexico","pigment",17.07,-96.73]
+    ["Burnt Roman Ochre","#ED872D","Rome","Lazio, Italy","pigment",41.9,12.5]
+    ["Roman Green","#665D1E","Rome","Lazio, Italy","pigment",41.9,12.5]
+    ["Roman Purple","#604E81","Rome","Lazio, Italy","pigment",41.9,12.5]
+    ["Burnt Sienna","#9E4732","Siena","Tuscany, Italy","pigment",43.34,11.35,"https://en.wikipedia.org/wiki/Sienna"]
+    ["Raw Sienna","#AE6938","Siena","Tuscany, Italy","pigment",43.32,11.33]
+    ["Siena","#882D17","Siena","Tuscany, Italy","pigment",43.32,11.33]
+    ["Sienna","#A0522D","Siena","Tuscany, Italy","pigment",43.32,11.33,"https://en.wikipedia.org/wiki/Sienna"]
+    ["Tyrian Purple","#66023C","Tyre (Sur)","Lebanon","pigment",33.27,35.2,"https://en.wikipedia.org/wiki/Tyrian_purple"]
+    ["Burnt Umber","#6F4E37","Umbria","Central Italy","pigment",43.09,12.37,"https://en.wikipedia.org/wiki/Umber"]
+    ["Raw Umber","#826644","Umbria","Central Italy","pigment",43.11,12.39,"https://en.wikipedia.org/wiki/Umber"]
+    ["Pampas","#5B504F","Pampas","Argentina","region",-34.0,-62.0]
+    ["Victoria Green","#6AAB8E","Lake Victoria","East Africa","water",-1.0,33.0]
+    ["Victoria","#563C5C","Lake Victoria","East Africa","water",-1.02,33.02]
+    ["Nile Green","#8A9A5B","Nile River","Egypt / Sudan","water",26.0,32.0]
+    ["Pale Congo Pink","#F4C2C2","Congo (DRC)","Central Africa","country",-4.0,24.0]
+    ["Scotch Grey","#8F9779","Scotland","United Kingdom","country",56.49,-4.2]
+    ["Scotch Mist","#B2BEB5","Scotland","United Kingdom","country",57.0,-4.5]
+    ["Alpine Blue","#B3BCE2","Alps","Central Europe","region",46.5,9.5]
+    ["Light Danube Green","#3B7861","Danube River","Central Europe","water",47.5,19.1]
+    ["Ultramarine","#30267A","Badakhshan","Afghanistan","pigment",36.7,71.3]
+    ["Violet Ultramarine","#545AA7","Badakhshan","Afghanistan","pigment",36.72,71.32]
+    ["Ultramarine Green","#1E2321","Badakhshan","Afghanistan","pigment",36.74,71.34]
+    ["Roman Violet","#5D3954","Rome","Lazio, Italy","pigment",41.9,12.5]
+    ["Roman Rose","#43302E","Rome","Lazio, Italy","city",41.92,12.5]
+    ["Saccardo's Umber","#7E6D5A","Umbria","Central Italy","pigment",43.11,12.39]
+    ["Burnt Italian Ochre","#9E4732","Italy","Central Italy","pigment",43.5,12.0]
+    ["Cadmium Carmine","#BC3F4A","Oaxaca","Mexico","pigment",17.07,-96.73]
+    ["Venice Blue","#96DED1","Venice","Veneto, Italy","city",45.44,12.32]
+    ["Venetian Fuchsia","#CE4676","Venice","Veneto, Italy","city",45.44,12.33]
+    ["Tuscan Sand","#967117","Tuscany","Italy","region",43.77,11.25]
+    ["Tuscan Tan","#A67B5B","Tuscany","Italy","region",43.79,11.27]
+    ["Champagne Buff","#F3E5AB","Champagne","France","region",49.0,4.0]
+    ["Chartreuse Green","#98943E","Chartreuse","Dauphin\u00e9, France","region",45.37,5.72]
+    ["Burgundy Violet","#875692","Burgundy","France","region",47.05,4.84]
+    ["French Green","#679267","France","Western Europe","country",46.6,2.2]
+    ["French Nude","#977F73","France","Western Europe","country",46.62,2.22]
+    ["French Purple","#A8516E","France","Western Europe","country",46.65,2.23]
+    ["French White","#BFB9BD","France","Western Europe","country",46.63,2.21]
+    ["Paris Yellow","#D4AF37","Paris","\u00cele-de-France, France","city",48.85,2.35]
+    ["Light Paris Green","#93C592","Paris","\u00cele-de-France, France","city",48.85,2.36]
+    ["Normandy Blue","#8DA399","Normandy","Normandy, France","region",49.18,0.37]
+    ["Chelsea Yellow","#EAE679","Chelsea","London, England","city",51.49,-0.17]
+    ["English Mist","#7D8984","England","United Kingdom","country",52.0,-1.2]
+    ["English Inde","#50404D","England","United Kingdom","country",52.02,-1.22]
+    ["Pale Windsor Blue","#70A3CC","Windsor","England, UK","city",51.48,-0.63]
+    ["Light Windsor Blue","#8791BF","Windsor","Berkshire, England","city",51.49,-0.64]
+    ["Saxony Green","#008856","Saxony","Germany","region",51.1,13.2]
+    ["Pale Russian Blue","#BCD4E6","Russia","Eurasia","country",55.75,37.62]
+    ["Pale Persian Lilac","#D597AE","Persia (Iran)","Middle East","country",32.0,53.0]
+    ["Seville","#32174D","Seville","Andalusia, Spain","city",37.39,-5.99]
+    ["Indian Pink","#A87C6D","India","South Asia","country",20.0,77.0]
+    ["Indian Tan","#996515","India","South Asia","country",20.02,77.02]
+    ["India Red","#56070C","India","South Asia","country",20.04,77.04]
+    ["India Ink","#555555","India","South Asia","pigment",20.06,77.06]
+    ["Chinese Green","#1B4D3E","China","East Asia","country",36.2,103.8]
+    ["Japanese Yellow","#FFB7A5","Japan","East Asia","country",36.2,138.25]
+    ["Java Brown","#3E322C","Java","Indonesia","country",-7.0,110.0]
+    ["Aztec Maroon","#915F6D","Aztec Empire","Mesoamerica","region",19.43,-99.13]
+    ["Rio Grande","#C2B280","Rio de Janeiro","Brazil","city",-22.9,-43.17]
+    ["Dutch Pink","#FADA5E","Netherlands","Western Europe","country",52.37,4.9]
+    ["Dutch Azure","#00416A","Netherlands","Western Europe","country",52.39,4.92]
 ];
 
 /* ── HSV ── */
@@ -644,14 +657,55 @@ function hsv(hex){
   return[Math.round(h*360),Math.round(s*100),Math.round(v*100)];
 }
 
-const BL={city:'b-city',region:'b-region',country:'b-country',water:'b-water',landform:'b-landform'};
-const BN={city:'City / Town',region:'Region / Province',country:'Country / Empire',water:'Water Body',landform:'Landform'};
+const BL={city:'b-city',region:'b-region',country:'b-country',water:'b-water',pigment:'b-pigment'};
+const BN={city:'City / Town',region:'Region / Province',country:'Country / Empire',water:'Water Body',pigment:'Pigment & Earth Source'};
 const COLORS=RAW.map((r,i)=>{
   const[h,s,v]=hsv(r[1]);
   const rb=parseInt(r[1].slice(1,3),16),gb=parseInt(r[1].slice(3,5),16),bb=parseInt(r[1].slice(5,7),16);
   const lum=Math.round((0.299*rb+0.587*gb+0.114*bb)/255*100);
-  return{i,n:r[0],hex:r[1],pl:r[2],cx:r[3],cat:r[4],la:r[5],lo:r[6],h,s,v,lum};
+  return{i,n:r[0],hex:r[1],pl:r[2],cx:r[3],cat:r[4],la:r[5],lo:r[6],wp:r[7]||null,h,s,v,lum};
 });
+
+/* ── COORDINATE JITTER for co-located markers ── */
+/* dla/dlo = full-offset display coords; la/lo = true coords (flyTo).      */
+/* At low zoom markers spread via golden-angle spiral; they collapse back   */
+/* to true position as the user zooms in (smooth lerp zoom 3 → 6).         */
+(function(){
+  const STEP=1.8; /* max offset step in degrees at world zoom */
+  const GOLDEN=2.399963; /* golden angle ≈ 137.5° */
+  const groups={};
+  COLORS.forEach(c=>{const k=c.la+','+c.lo;if(!groups[k])groups[k]=[];groups[k].push(c);});
+  Object.values(groups).forEach(grp=>{
+    grp.forEach((c,idx)=>{
+      if(idx===0){c.dla=c.la;c.dlo=c.lo;c._jIdx=0;c._jAngle=0;return;}
+      const r=STEP*Math.sqrt(idx);
+      const a=idx*GOLDEN;
+      c.dla=+(c.la+r*Math.cos(a)).toFixed(4);
+      c.dlo=+(c.lo+r*Math.sin(a)).toFixed(4);
+      c._jIdx=idx;
+      c._jAngle=a;
+    });
+  });
+})();
+
+/* Return display [lat,lon]: degree-spread at low zoom, pixel ring at high zoom */
+const PIX_STEP=14; /* pixels between ring steps at zoom ≥ Z1 */
+function jitteredLatLng(c,z){
+  const Z0=3,Z1=6;
+  if(z<=Z0)return[c.dla,c.dlo];
+  if(z>=Z1){
+    /* Fixed pixel ring — offset in screen space, convert back to geographic coords */
+    if(c._jIdx===0)return[c.la,c.lo];
+    const r=PIX_STEP*Math.sqrt(c._jIdx);
+    const tp=map.latLngToContainerPoint([c.la,c.lo]);
+    const op=L.point(tp.x+r*Math.cos(c._jAngle),tp.y-r*Math.sin(c._jAngle));
+    const ll=map.containerPointToLatLng(op);
+    return[ll.lat,ll.lng];
+  }
+  /* Lerp between degree spread and pixel ring zone */
+  const t=(z-Z0)/(Z1-Z0);
+  return[c.dla+t*(c.la-c.dla),c.dlo+t*(c.lo-c.dlo)];
+}
 
 let cat='',srtK='h',srtD=1,selIdx=-1;
 const markers=[];
@@ -733,16 +787,24 @@ function updateInfoCtrl(c){
     '</a>'+
     '<div class="mi-body">'+
       '<div class="mi-hsv">H:'+c.h+'&#xB0; &nbsp;S:'+c.s+'% &nbsp;V:'+c.v+'%</div>'+
+      (c.wp?'<a class="mi-wp" href="'+c.wp+'" target="_blank" rel="noopener">Wikipedia &#x2197;</a>':'')+
       '<button class="mi-add" onclick="addToPalette('+c.i+',null)" '+(inPal?'disabled title="Already in palette"':'title="Add to palette"')+'>'+(inPal?'&#x2713; In palette':'+ Add to palette')+'</button>'+
     '</div>';
 }
 
 COLORS.forEach((c,i)=>{
-  const m=L.circleMarker([c.la,c.lo],{radius:7,fillColor:c.hex,color:'rgba(255,255,255,0.85)',weight:1.5,fillOpacity:0.92}).addTo(map);
+  const ll=jitteredLatLng(c,map.getZoom());
+  const m=L.circleMarker(ll,{radius:7,fillColor:c.hex,color:'rgba(255,255,255,0.85)',weight:1.5,fillOpacity:0.92}).addTo(map);
   m.bindTooltip(c.n,{direction:'top',offset:[0,-6],opacity:1});
   m.bindPopup('<div class="lp"><div class="lp-head"><div class="lp-sw" style="background:'+c.hex+'"></div><div><div class="lp-nm">'+c.n+'</div><div class="lp-pl">'+c.pl+'<br>'+c.cx+'</div></div></div><div class="lp-hsv">'+c.hex+' &middot; H:'+c.h+'&deg; S:'+c.s+'% V:'+c.v+'%</div><div style="margin-top:5px"><span class="badge '+BL[c.cat]+'">'+BN[c.cat]+'</span></div></div>',{maxWidth:230});
-  m.on('click',()=>selectColor(i,false));
+  m.on('click',()=>selectColor(i,true));
   markers.push(m);
+});
+
+/* Reposition markers as zoom changes so offset fades toward true location */
+map.on('zoomend',function(){
+  const z=map.getZoom();
+  COLORS.forEach((c,i)=>{markers[i].setLatLng(jitteredLatLng(c,z));});
 });
 
 function selectColor(idx,flyTo){
@@ -842,7 +904,7 @@ function go(){
     '<span class="fb-stat"><b>'+(cats.region||0)+'</b> regions</span>'+
     '<span class="fb-stat"><b>'+(cats.country||0)+'</b> countries</span>'+
     '<span class="fb-stat"><b>'+(cats.water||0)+'</b> water</span>'+
-    '<span class="fb-stat"><b>'+(cats.landform||0)+'</b> landforms</span>';
+    '<span class="fb-stat"><b>'+(cats.pigment||0)+'</b> pigments</span>';
 }
 
 /* ── PALETTE ── */
