@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.6.1/maplibre-gl.css"/>
 
  <!-- SEO -->
 <meta name="description" content="Interactive map for exploring earth-toned colour palettes by geographic location. Browse colours by place, view HSV and luminance data, generate palettes.">
@@ -44,6 +45,20 @@ header h1{font-family:'IM Fell English SC',serif;font-size:20px;font-weight:400;
 .h-spacer-l{flex:1.5}
 .h-spacer-r{flex:1}
 .h-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+/* dropdown menu */
+.dd{position:relative}
+.dd-menu{display:none;position:absolute;right:0;top:calc(100% + 5px);min-width:210px;background:var(--surface);border:.5px solid var(--border-strong);border-radius:5px;padding:4px;z-index:1200;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.dd.open .dd-menu{display:block}
+.dd-menu button{display:block;width:100%;text-align:left;background:none;border:none;border-radius:3px;padding:5px 9px;font-family:'Crimson Pro',serif;font-size:13.5px;color:var(--ink);cursor:pointer}
+.dd-menu button:hover{background:rgba(139,58,31,.08);color:var(--rust)}
+.dd-menu .dd-sub{display:block;font-size:11px;color:var(--ink-light);font-style:italic}
+.dd-sep{height:.5px;background:var(--border);margin:3px 4px}
+/* sort dropdown */
+.sort-sel{font-family:'Crimson Pro',serif;font-size:13px;color:var(--ink-mid);background:var(--surface);border:.5px solid var(--border-strong);border-radius:3px;padding:2px 4px;cursor:pointer;flex-shrink:0}
+.sort-dir{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-mid);background:none;border:.5px solid var(--border-strong);border-radius:3px;width:24px;height:22px;cursor:pointer;flex-shrink:0;padding:0}
+.sort-dir:hover,.sort-sel:hover{color:var(--rust);border-color:var(--rust)}
+/* print-map legend (hidden on screen) */
+.pm-sheet{display:none}
 .btn{background:none;border:.5px solid var(--border-strong);border-radius:4px;color:var(--ink-mid);cursor:pointer;font-size:13px;padding:4px 9px;font-family:'Crimson Pro',serif;transition:all .12s;white-space:nowrap}
 .btn:hover{color:var(--rust);border-color:var(--rust)}
 .btn.active{background:var(--rust);color:#fff;border-color:var(--rust)}
@@ -54,6 +69,7 @@ header h1{font-family:'IM Fell English SC',serif;font-size:20px;font-weight:400;
 .srch{padding:4px 10px;font-size:13px;font-family:'Crimson Pro',serif;border:.5px solid var(--border-strong);border-radius:3px;background:var(--surface);color:var(--ink);width:176px;outline:none;flex-shrink:0}
 .srch:focus{border-color:var(--rust)}
 .div{width:.5px;height:15px;background:var(--border);flex-shrink:0}
+.div.sp-wide{margin:0 14px}
 .chip{padding:2px 9px;font-size:13px;font-family:'Crimson Pro',serif;border:.5px solid var(--border-strong);border-radius:20px;background:transparent;color:var(--ink-mid);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .12s}
 .chip:hover{background:rgba(139,58,31,.07);color:var(--rust);border-color:rgba(139,58,31,.4)}
 .chip.on{background:var(--rust);color:#fff;border-color:var(--rust)}
@@ -72,10 +88,10 @@ header h1{font-family:'IM Fell English SC',serif;font-size:20px;font-weight:400;
 /* ── TABLE PANE ── */
 .tpane{flex:1;overflow-y:auto;min-width:0;min-height:0}
 table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
-col.c-sw{width:32px}col.c-nm{width:148px}col.c-pl{width:auto}col.c-tp{width:104px}col.c-h{width:55px}col.c-s{width:52px}col.c-v{width:52px}col.c-lum{width:52px}col.c-hx{width:70px}col.c-la{width:57px}col.c-lo{width:61px}
 thead{position:sticky;top:0;z-index:10;background:var(--bg)}
 th{padding:6px 7px;font-family:'Crimson Pro',serif;font-size:12px;font-weight:400;font-style:italic;color:var(--ink-mid);border-bottom:1px solid var(--border-strong);text-align:left;white-space:nowrap;cursor:pointer;user-select:none;overflow:hidden;transition:color .1s}
 th:hover{color:var(--rust)}
+th.r{text-align:right}
 .si{opacity:.7;font-style:normal;font-size:9px}
 tbody tr{border-bottom:.5px solid var(--border);cursor:pointer;transition:background .07s}
 tbody tr:hover{background:rgba(90,72,48,.04)}
@@ -87,6 +103,7 @@ td{padding:4px 7px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis}
 .cn{font-weight:600;color:var(--ink);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .hx{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-light);display:block}
 .pl{color:var(--ink);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.ll{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-light);letter-spacing:-.02em}
 .cx{color:var(--ink-light);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;margin-top:1px}
 .co{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-light);text-align:right;white-space:nowrap}
 .nm{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink);text-align:right;display:block}
@@ -99,6 +116,7 @@ td{padding:4px 7px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis}
 .b-country{background:#EDF0FC;color:#2D3A8C;border-color:#9BA8E8}
 .b-water{background:#E0F4F0;color:#0A5046;border-color:#5EC6AD}
 .b-pigment{background:#F9EDD4;color:#5C3A00;border-color:#C49020}
+.b-egg{background:transparent;color:var(--ink-light);border-color:var(--border-strong);border-style:dashed}
 [data-theme="dark"] .b-city{background:#3A2200;color:#F0C060;border-color:#7A5020}
 [data-theme="dark"] .b-region{background:#1A2800;color:#9EC45B;border-color:#3A5020}
 [data-theme="dark"] .b-country{background:#0E1430;color:#9BA8E8;border-color:#2D3A8C}
@@ -135,6 +153,16 @@ tbody tr:hover .add-pal{display:inline-block}
 .lp-hsv{font-size:9.5px;color:var(--ink-light);font-family:'JetBrains Mono',monospace}
 .leaflet-tooltip{font-family:'Crimson Pro',serif!important;font-size:12px!important;border:.5px solid var(--border-strong)!important;border-radius:3px!important;color:var(--ink)!important;background:var(--bg)!important}
 .leaflet-control-container .leaflet-bottom.leaflet-left{bottom:6px}
+/* basemap tile treatments */
+/* layer selector */
+.leaflet-control-layers{background:var(--surface)!important;color:var(--ink)!important;border:.5px solid var(--border-strong)!important;border-radius:4px!important;box-shadow:none!important;font-family:'Crimson Pro',Georgia,serif;font-size:13px}
+.leaflet-control-layers-expanded{padding:6px 10px 6px 8px}
+.leaflet-control-layers-base label{margin:2px 0;cursor:pointer}
+.leaflet-control-layers-base input{accent-color:var(--rust);margin-right:4px}
+.bm-title{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-light);margin:0 0 3px}
+[data-theme="dark"] .leaflet-control-layers-toggle{filter:invert(.85)}
+[data-theme="dark"] .leaflet-control-attribution{background:rgba(35,29,20,.8)!important;color:var(--ink-mid)}
+[data-theme="dark"] .leaflet-control-attribution a{color:var(--gold)}
 
 /* ── PALETTE TRAY ── */
 .pal-tray{flex-shrink:0;border-top:1px solid var(--border-strong);background:var(--bg);overflow:hidden;max-height:0;transition:max-height .3s ease}
@@ -229,7 +257,7 @@ tbody tr:hover .add-pal{display:inline-block}
 @media print{
   *{transition:none!important;overflow:visible!important}
   html,body{overflow:visible;height:auto}
-  .h-right,.controls,.map-pane,.drag-handle,.pal-tray,.footer-bar,.help-drawer{display:none!important}
+  .h-right,.h-pal-group,.controls,.map-pane,.drag-handle,.pal-tray,.footer-bar,.help-drawer{display:none!important}
   .credits-drawer{max-height:none!important;border-top:none;display:block}
   .credits-inner{display:block;padding:8pt 0 0}
   .cr-title{font-size:8pt;color:#333!important}
@@ -248,6 +276,21 @@ tbody tr:hover .add-pal{display:inline-block}
   .badge{background:#eee!important;color:#333!important;border:.25pt solid #aaa!important}
   .hx,.cx,.co,.nm{color:#555!important}
   @page{margin:1.4cm;size:A4 landscape}
+  /* ── map PDF mode ── */
+  body.print-map header,body.print-map .tpane,body.print-map .credits-drawer{display:none!important}
+  body.print-map .main{display:block!important}
+  body.print-map .map-pane{display:block!important;width:var(--pm-w)!important;height:var(--pm-h)!important;max-width:none!important;transform:scale(var(--pm-s));transform-origin:top left;margin-bottom:calc(var(--pm-h) * (var(--pm-s) - 1));border:.5pt solid #999;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body.print-map #map,body.print-map .map-pane *{overflow:hidden!important}
+  body.print-map .leaflet-control-zoom,body.print-map .leaflet-control-layers,body.print-map .map-info{display:none!important}
+  body.print-map .pm-sheet{display:block;font-family:Georgia,serif;color:#222}
+  .pm-head{margin:0 0 6pt}
+  .pm-title{font-size:13pt}
+  .pm-sub{font-size:8pt;color:#666}
+  .pm-legend{margin-top:8pt;columns:4;column-gap:12pt;font-size:7pt;line-height:1.35}
+  .pm-item{break-inside:avoid;display:flex;align-items:center;gap:4pt}
+  .pm-sw{width:8pt;height:8pt;border:.25pt solid #999;flex-shrink:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pm-hex{color:#888;font-family:monospace}
+  .pm-foot{margin-top:8pt;font-size:6.5pt;color:#888}
 }
 </style>
 </head>
@@ -265,9 +308,17 @@ tbody tr:hover .add-pal{display:inline-block}
   </div>
   <div class="h-spacer-r"></div>
   <div class="h-right">
-    <button class="btn" onclick="exportCSV()" title="Export current view as CSV">&#x2193; CSV</button>
+    <div class="dd" id="dlDD">
+      <button class="btn" onclick="toggleDD('dlDD',event)">&#x2193; Download &#x25BE;</button>
+      <div class="dd-menu">
+        <button onclick="closeDD();exportCSV()">Table &mdash; CSV<span class="dd-sub">Filtered rows, all columns</span></button>
+        <button onclick="closeDD();printTable()">Table &mdash; print / PDF<span class="dd-sub">Opens the print dialog</span></button>
+        <div class="dd-sep"></div>
+        <button onclick="closeDD();exportMapHTML()">Map &mdash; interactive HTML<span class="dd-sub">Filtered colours, current view and basemap</span></button>
+        <button onclick="closeDD();exportMapPDF()">Map &mdash; PDF<span class="dd-sub">Current view + legend; choose &lsquo;Save as PDF&rsquo;</span></button>
+      </div>
+    </div>
     <button class="btn" onclick="toggleTheme()" id="themeBtn">&#x25D1; Dark</button>
-    <button class="btn" onclick="window.print()">&#x2399; Print</button>
   </div>
 </header>
 
@@ -281,13 +332,21 @@ tbody tr:hover .add-pal{display:inline-block}
   <span class="chip" id="chip-country" onclick="setcat('country')">Country / Empire</span>
   <span class="chip" id="chip-water" onclick="setcat('water')">Water Body</span>
   <span class="chip" id="chip-pigment" onclick="setcat('pigment')">Pigment &amp; Earth</span>
-  <div class="div"></div>
-  <span>Sort by:</span>
-  <span class="chip" id="chip-hue" onclick="setSrt('h',1)">Hue</span>
-  <span class="chip" id="chip-sat" onclick="setSrt('s',-1)">Saturation</span>
-  <span class="chip" id="chip-val" onclick="setSrt('v',-1)">Brightness</span>
-  <span class="chip" id="chip-la" onclick="setSrt('la',1)">N&#x2192;S</span>
-  <span class="chip" id="chip-lo" onclick="setSrt('lo',1)">W&#x2192;E</span>
+  <div class="div sp-wide"></div>
+  <span>Sort table by:</span>
+  <select id="sortSel" class="sort-sel" onchange="setSrt(this.value)" aria-label="Sort by">
+    <option value="h">Hue</option>
+    <option value="s">Saturation</option>
+    <option value="v">Brightness</option>
+    <option value="lum">Luminance</option>
+    <option value="la">Latitude (N&ndash;S)</option>
+    <option value="lo">Longitude (W&ndash;E)</option>
+    <option value="n">Name</option>
+    <option value="pl">Place</option>
+    <option value="cat">Type</option>
+    <option value="hex">Hex</option>
+  </select>
+  <button id="sortDir" class="sort-dir" onclick="flipSort()" title="Reverse order">&#x2191;</button>
   <div class="div"></div>
   <span style="font-size:12px;color:var(--ink-light);font-family:'JetBrains Mono',monospace;white-space:nowrap;flex-shrink:0" id="hcnt"></span>
 </div>
@@ -296,20 +355,20 @@ tbody tr:hover .add-pal{display:inline-block}
 <div class="help-drawer" id="helpDrawer">
   <div class="help-inner">
     <div>
-      <div class="hi-title">About this site</div>
-      <p class="hi-text"><em>Earth Colours</em> is a geographical colour encyclopedia — a reference for 243 named colours whose identities are rooted in place. Browse the full list, search by name or hex value, filter by type, and follow each colour back to its corner of the world on the map.<br><br>For cartographers and designers, the <strong>Earth Palette</strong> tool lets you assemble colours from the collection or build perceptually smooth <strong>colour gradients</strong>.</p>
+      <div class="hi-title">About</div>
+      <p class="hi-text"><em>Earth Colours</em> maps <span class="n-total">237</span> named colours rooted in place. Search, filter and sort the table; click a row or marker to see the colour on the map.</p>
     </div>
     <div>
       <div class="hi-title">Colour geographies</div>
-      <p class="hi-text">Colours are geographical, variably derived from earthly material, human visual perception, or place attachment. Many colour names flag a location: <strong>Bordeaux</strong> from a wine capital, <strong>Magenta</strong> from a Lombardy battlefield,or <strong>Dresden Blue</strong> from a local Saxon porcelain tradition. Others evoke visual landscape, from the green of the <strong>Amazon</strong> to the blue of the <strong>Danube</strong>. Another category names colours for their physical source: the iron-rich clays near <strong>Siena</strong>, <strong>Vermilion</strong> from cinnabar extracted at Almad&#xe9;n, <strong> Carmine</strong> from cochineal insects in Oaxaca, or <strong>lapis lazuli</strong> quarried in Badakhshan.</p>
+      <p class="hi-text">Names point to place in different ways: a city&rsquo;s trade (<strong>Bordeaux</strong>, <strong>Delft Blue</strong>), an event (<strong>Magenta</strong>, an 1859 battle), a landscape (<strong>Blue Danube</strong>), or a pigment source (<strong>Sienna</strong> clays, <strong>Lapis Lazuli</strong> from Badakhshan).</p>
     </div>
     <div>
-      <div class="hi-title">Create an Earth Colour Palette</div>
-      <p class="hi-text">Hover any table row and click <strong>+</strong> to add a colour. Or click a map marker, then use <strong>+ Add to palette</strong> in the info panel. The tray opens along the bottom of the screen. Drag colour chips to reorder. Use the <strong>Sort</strong> buttons to arrange by hue, saturation, brightness, or luminance. Hover a chip to reveal the <strong>&times;</strong> remove button. <strong>Clear</strong> empties the palette.</p>
+      <div class="hi-title">Map &amp; downloads</div>
+      <p class="hi-text">Switch basemap with the layers button on the map. <strong>Download</strong> saves the table (CSV or print) or the map (interactive HTML or PDF) for the current filter.</p>
     </div>
     <div>
-      <div class="hi-title">Cartographic Colour Ramp Generator</div>
-      <p class="hi-text">To create map colour gradients, add desired colours to palette — at least <strong>2</strong> for a sequential colour scheme (e.g. &#x2018;high&#x2019; to &#x2018;low&#x2019;), <strong>3</strong> for diverging (e.g. &#x2018;hot&#x2019;, &#x2018;cold&#x2019;, &#x2018;neutral&#x2019;). The ramp interpolates additional classes through <strong>CIELAB colour space</strong>, which matches human perception well for cartographic gradients.Choose 3&#x2013;11 classes. Export as <strong>CSV</strong> (hex, RGB, HSV), <strong>PNG</strong>, <strong>QGIS XML</strong>, or <strong>CSS gradient</strong>.</p>
+      <div class="hi-title">Palette &amp; ramp</div>
+      <p class="hi-text">Add colours with <strong>+</strong> on a row or the map panel; drag to reorder. With 2+ colours, a CIELAB ramp (3&ndash;11 classes) is built for sequential or diverging schemes. Export as CSV, PNG, QGIS XML or CSS.</p>
     </div>
   </div>
 </div>
@@ -319,20 +378,8 @@ tbody tr:hover .add-pal{display:inline-block}
   <div class="drag-handle" id="dragHandle" title="Drag to resize"></div>
   <div class="tpane" id="tpane">
     <table>
-      <colgroup><col class="c-sw"><col class="c-nm"><col class="c-pl"><col class="c-tp"><col class="c-h"><col class="c-s"><col class="c-v"><col class="c-lum"><col class="c-hx"><col class="c-la"><col class="c-lo"></colgroup>
-      <thead><tr>
-        <th></th>
-        <th onclick="setSrt('n',1)">Colour name <span class="si" id="si-n"></span></th>
-        <th onclick="setSrt('pl',1)">Place / context <span class="si" id="si-pl"></span></th>
-        <th onclick="setSrt('cat',1)">Type <span class="si" id="si-cat"></span></th>
-        <th onclick="setSrt('h',1)" style="text-align:right" title="Hue 0-360">H&#xB0; <span class="si" id="si-h"></span></th>
-        <th onclick="setSrt('s',-1)" title="Saturation">S% <span class="si" id="si-s"></span></th>
-        <th onclick="setSrt('v',-1)" title="Brightness">V% <span class="si" id="si-v"></span></th>
-        <th onclick="setSrt('lum',-1)" title="Perceptual luminance">Lum% <span class="si" id="si-lum"></span></th>
-        <th onclick="setSrt('hx',1)">Hex <span class="si" id="si-hx"></span></th>
-        <th onclick="setSrt('la',1)" style="text-align:right">Lat <span class="si" id="si-la"></span></th>
-        <th onclick="setSrt('lo',1)" style="text-align:right">Lng <span class="si" id="si-lo"></span></th>
-      </tr></thead>
+      <colgroup id="cg"></colgroup>
+      <thead><tr id="thr"></tr></thead>
       <tbody id="tb"></tbody>
     </table>
   </div>
@@ -391,14 +438,17 @@ tbody tr:hover .add-pal{display:inline-block}
   <div class="credits-inner">
     <div>
       <div class="cr-title">Sources</div>
-      <p class="cr-text">This list is compiled from two sources. First, colours with individual Wikipedia articles or entries on the <a href="https://en.wikipedia.org/wiki/List_of_colors_(alphabetical)"target="_blank" rel="noopener">Wikipedia list of colors</a>, which provide stable published references for colour name and value. Second, it uses historically documented geographic colour names from three classic dictionaries indexed and digitized at Jaffer's <a href="https://people.csail.mit.edu/jaffer/Color/Dictionaries"target="_blank" rel="noopener">Color-Name Dictionaries: </a><em>A Dictionary of Color</a></em> by Maerz &amp; Paul (McGraw-Hill, 1930), <em>Color Standards and Color Nomenclature</em> by Robert Ridgway (Smithsonian, 1912), and the Plochere Color System (1948). Names compiled from these sources are mapped to the 267 colour centroids developed by NBS/ISCC (Kelly and Judd, 1976). The result is a curated rather than exhaustive collection of geographic colours. Geographic coordinates are approximate centroids from OpenStreetMap / Natural Earth.</p>
+      <p class="cr-text">Colours with a Wikipedia article or an entry in the <a href="https://en.wikipedia.org/wiki/List_of_colors_(alphabetical)" target="_blank" rel="noopener">Wikipedia list of colors</a> use that value; in a few cases where Wikipedia gives only a modern web (CSS/X11) value, a traditional value is used instead. All other colours come from three dictionaries digitised in Jaffer&rsquo;s <a href="https://people.csail.mit.edu/jaffer/Color/Dictionaries" target="_blank" rel="noopener">Color-Name Dictionaries</a>: Maerz &amp; Paul, <em>A Dictionary of Color</em> (1930); Ridgway, <em>Color Standards and Color Nomenclature</em> (1912); and the Plochere Color System (1948), mapped to the 267 NBS/ISCC centroids (Kelly &amp; Judd, 1976). Coordinates are approximate.</p>
     </div>
     <div>
-      <div class="cr-title">Methodology &amp; notes</div>
-      <p class="cr-text">Hex values for colours with individual Wikipedia articles or list entries are taken from those sources; for all other entries, values are drawn from the Color-Name Dictionaries. Historical pigments were variable in formulation and the values here are representative, not authoritative. HSV and luminance values are derived from the hex representations. Many of these colour names carry archaic, trade, and colonial-era associations and their inclusion here is merely documentary. Colours are grouped into five types: city, region, country, water body, and pigment &amp; earth source. Where multiple colours share a location, map markers are offset to avoid symbol overlap.</p> <div class="cr-attr">Created by <a href="https://jcinnamon.github.io/" target="_blank" rel="noopener">Jonathan Cinnamon</a> (<a href="https://ccgs.ok.ubc.ca/about/contact/jonathan-cinnamon/" target="_blank" rel="noopener">UBC Okanagan</a>), 2026.</div>
+      <div class="cr-title">Notes</div>
+      <p class="cr-text">Historical pigments varied, so values are representative, not authoritative. HSV and luminance are derived from hex. Many names carry trade and colonial-era associations and are included as documentary record. Markers sharing a location are offset. Basemaps: OpenFreeMap / OpenMapTiles (OpenStreetMap data), Esri, OpenTopoMap.</p> <div class="cr-attr">Created by <a href="https://jcinnamon.github.io/" target="_blank" rel="noopener">Jonathan Cinnamon</a>, 2026.</div>
     </div>
   </div>
 </div>
+
+<!-- MAP PDF SHEET (print only) -->
+<div class="pm-sheet" id="pmSheet"></div>
 
 <!-- SLIM FOOTER BAR -->
 <div class="footer-bar">
@@ -406,97 +456,99 @@ tbody tr:hover .add-pal{display:inline-block}
   <div class="fb-spacer"></div>
   <button class="fb-cred" id="credBtn" onclick="toggleCredits()">Credits &amp; methodology &#x25BE;</button>
   <div class="fb-sep"></div>
-  <span class="fb-attr">Created by <a href="https://jcinnamon.github.io/" target="_blank" rel="noopener">Jonathan Cinnamon</a> &middot; <a href="https://ccgs.ok.ubc.ca/about/contact/jonathan-cinnamon/" target="_blank" rel="noopener">@ UBC Okanagan</a> &middot; 2026</span>
+  <span class="fb-attr">Created by <a href="https://jcinnamon.github.io/" target="_blank" rel="noopener">Jonathan Cinnamon</a> &middot; 2026</span>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.6.1/maplibre-gl.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.1.3/leaflet-maplibre-gl.js"></script>
 <script>
 const RAW=[
     ["Alexandria Blue","#00A1C2","Alexandria","Egypt","city",31.2,29.92],
     ["Algiers Blue","#367588","Algiers","Algeria","city",36.75,3.04],
-    ["Antwerp Blue","#2E8495","Antwerp (Antwerpen)","Flanders, Belgium","city",51.22,4.4],
+    ["Antwerp Blue","#2E8495","Antwerp","Belgium","city",51.22,4.4],
     ["Berlin Brown","#905D5D","Berlin","Germany","city",52.52,13.4],
-    ["Bombay","#80461B","Bombay (Mumbai)","Maharashtra, India","city",19.08,72.88],
-    ["Bordeaux","#800032","Bordeaux","Nouvelle-Aquitaine, France","city",44.84,-0.58,"https://en.wikipedia.org/wiki/Bordeaux_(color)"],
-    ["Bruges","#004958","Bruges (Brugge)","Flanders, Belgium","city",51.21,3.22],
-    ["Deep Brunswick Green","#1B4D3E","Brunswick (Braunschweig)","Lower Saxony, Germany","city",52.27,10.52],
-    ["Cairo","#00416A","Cairo (Al-Qahirah)","Egypt","city",30.05,31.24],
+    ["Bombay","#80461B","Bombay / Mumbai","India","city",19.08,72.88],
+    ["Bordeaux","#800032","Bordeaux","France","city",44.84,-0.58,"https://en.wikipedia.org/wiki/Bordeaux_(color)"],
+    ["Bruges","#004958","Bruges","Belgium","city",51.21,3.22],
+    ["Deep Brunswick Green","#1B4D3E","Brunswick","Germany","city",52.27,10.52],
+    ["Cairo","#00416A","Cairo","Egypt","city",30.05,31.24],
     ["Cambridge Blue","#A3C1AD","Cambridge","England, UK","city",52.2,0.12],
     ["Cambridge Red","#AB4E52","Cambridge","England, UK","city",52.2,0.12],
-    ["Canton","#317873","Canton (Guangzhou)","Guangdong, China","city",23.13,113.26],
-    ["Canton Jade","#317873","Canton (Guangzhou)","Guangdong, China","city",23.13,113.26],
-    ["Capri Blue","#367588","Capri","Campania, Italy","city",40.55,14.24],
-    ["Cinnamon","#D27D2D","Not a geographic colour...","null","null",50.267, -119.272,"https://htmlcolorcodes.com/colors/cinnamon/"],
-    ["Cologne Yellow","#D4AF37","Cologne (K\u00f6ln)","NRW, Germany","city",50.94,6.96],
-    ["Cordovan","#893F45","Cordoba","Andalusia, Spain","city",37.89,-4.78,"https://en.wikipedia.org/wiki/Cordovan_(color)"],
-    ["Delft Blue","#4C516D","Delft","South Holland, Netherlands","city",52.01,4.36],
-    ["Dresden Brown","#826644","Dresden","Saxony, Germany","city",51.05,13.74],
+    ["Canton","#317873","Canton / Guangzhou","China","city",23.13,113.26],
+    ["Canton Jade","#317873","Canton / Guangzhou","China","city",23.13,113.26],
+    ["Capri Blue","#367588","Capri","Italy","city",40.55,14.24],
+    ["Cinnamon","#D27D2D","…","","egg",50.267,-119.272,"https://htmlcolorcodes.com/colors/cinnamon/"],
+    ["Cologne Yellow","#D4AF37","Cologne","Germany","city",50.94,6.96],
+    ["Cordovan","#893F45","Cordoba","Spain","city",37.89,-4.78,"https://en.wikipedia.org/wiki/Cordovan_(color)"],
+    ["Delft Blue","#4C516D","Delft","Netherlands","city",52.01,4.36],
+    ["Dresden Brown","#826644","Dresden","Germany","city",51.05,13.74],
     ["Eton Blue","#96C8A2","Eton","England, UK","city",51.49,-0.61],
-    ["Florentine","#E25822","Florence (Firenze)","Tuscany, Italy","city",43.77,11.26],
+    ["Florentine","#E25822","Florence","Italy","city",43.77,11.26],
     ["Kyoto","#F88379","Kyoto","Japan","city",35.01,135.77],
     ["Lincoln Green","#195905","Lincoln","England, UK","city",53.23,-0.54,"https://en.wikipedia.org/wiki/Lincoln_Green"],
     ["Madrid","#635147","Madrid","Spain","city",40.42,-3.7],
-    ["Magenta","#FF00FF","Magenta","Lombardy, Italy","city",45.46,8.88,"https://en.wikipedia.org/wiki/Magenta"],
-    ["Manila","#C19A6B","Manila","Luzon, Philippines","city",14.6,120.98],
-    ["Naples Yellow","#FADA5E","Naples (Napoli)","Campania, Italy","city",40.85,14.27,"https://en.wikipedia.org/wiki/Naples_yellow"],
+    ["Magenta","#FF0090","Magenta","Italy","city",45.46,8.88,"https://en.wikipedia.org/wiki/Magenta"],
+    ["Manila","#C19A6B","Manila","Philippines","city",14.6,120.98],
+    ["Naples Yellow","#FADA5E","Naples","Italy","city",40.85,14.27,"https://en.wikipedia.org/wiki/Naples_yellow"],
     ["Oxford Blue","#002147","Oxford","England, UK","city",51.75,-1.26],
-    ["Paris Green","#50C878","Paris","Ile-de-France, France","city",48.85,2.35,"https://en.wikipedia.org/wiki/Paris_green"],
-    ["Paris Mud","#543D3F","Paris","\u00cele-de-France, France","city",48.85,2.35],
-    ["Parma Red","#BC3F4A","Parma","Emilia-Romagna, Italy","city",44.8,10.33],
-    ["Pompeian Red","#B22222","Pompeii","Campania, Italy","city",40.75,14.49,"https://en.wikipedia.org/wiki/Pompeian_red"],
-    ["Pompeii","#56070C","Pompeii","Campania, Italy","city",40.75,14.49],
+    ["Paris Green","#50C878","Paris","France","city",48.85,2.35,"https://en.wikipedia.org/wiki/Paris_green"],
+    ["Paris Mud","#543D3F","Paris","France","city",48.85,2.35],
+    ["Parma Red","#BC3F4A","Parma","Italy","city",44.8,10.33],
+    ["Pompeian Red","#905D5D","Pompeii","Italy","city",40.75,14.49,"https://en.wikipedia.org/wiki/Pompeian_red"],
+    ["Pompeii","#56070C","Pompeii","Italy","city",40.75,14.49],
     ["Rio Blue","#91A3B0","Rio de Janeiro","Brazil","city",-22.9,-43.17],
-    ["Seville Orange","#D99058","Seville (Sevilla)","Andalusia, Spain","city",37.39,-5.99],
-    ["Tangerine","#F28500","Tangier (Tanger)","Morocco","city",35.76,-5.8],
-    ["Tangier","#ED872D","Tangier (Tanger)","Morocco","city",35.76,-5.8],
+    ["Seville Orange","#D99058","Seville","Spain","city",37.39,-5.99],
+    ["Tangerine","#F28500","Tangier","Morocco","city",35.76,-5.8],
+    ["Tangier","#ED872D","Tangier","Morocco","city",35.76,-5.8],
     ["Tokyo","#FFB7A5","Tokyo","Japan","city",35.68,139.69],
-    ["Venetian Red","#C80815","Venice","Veneto, Italy","city",45.44,12.33,"https://en.wikipedia.org/wiki/Venetian_red"],
-    ["Venetian Blue","#007791","Venice (Venezia)","Veneto, Italy","city",45.44,12.33],
-    ["Venetian Pink","#DEA5A4","Venice (Venezia)","Veneto, Italy","city",45.44,12.33],
-    ["Venetian Rose","#841B2D","Venice (Venezia)","Veneto, Italy","city",45.44,12.33],
-    ["Venetian Yellow","#F8DE7E","Venice (Venezia)","Veneto, Italy","city",45.44,12.33],
-    ["Verona Yellow","#FADA5E","Verona","Veneto, Italy","city",45.44,10.99],
-    ["Vienna Blue","#007791","Vienna (Wien)","Austria","city",48.21,16.37],
-    ["Vienna Green","#3EB489","Vienna (Wien)","Austria","city",48.21,16.37],
-    ["Vienna Smoke","#555555","Vienna (Wien)","Austria","city",48.21,16.37],
+    ["Venetian Red","#C80815","Venice","Italy","city",45.44,12.33,"https://en.wikipedia.org/wiki/Venetian_red"],
+    ["Venetian Blue","#007791","Venice","Italy","city",45.44,12.33],
+    ["Venetian Pink","#DEA5A4","Venice","Italy","city",45.44,12.33],
+    ["Venetian Rose","#841B2D","Venice","Italy","city",45.44,12.33],
+    ["Venetian Yellow","#F8DE7E","Venice","Italy","city",45.44,12.33],
+    ["Verona Yellow","#FADA5E","Verona","Italy","city",45.44,10.99],
+    ["Vienna Blue","#007791","Vienna","Austria","city",48.21,16.37],
+    ["Vienna Green","#3EB489","Vienna","Austria","city",48.21,16.37],
+    ["Vienna Smoke","#555555","Vienna","Austria","city",48.21,16.37],
     ["Clear Windsor Blue","#8791BF","Windsor","England, UK","city",51.48,-0.63],
     ["Windsor","#563C5C","Windsor","England, UK","city",51.48,-0.63],
     ["Zanzibar","#43302E","Zanzibar City","Tanzania","city",-6.16,39.2],
     ["Aztec","#996515","Aztec Empire","Mesoamerica","region",19.43,-99.13],
-    ["Bavarian Blue","#00304E","Bavaria (Bayern)","Germany","region",48.79,11.5],
-    ["Burgundy","#9F1D35","Burgundy (Bourgogne)","France","region",47.05,4.84,"https://en.wikipedia.org/wiki/Burgundy_(color)"],
-    ["Old Burgundy","#3E1D1E","Burgundy (Bourgogne)","France","region",47.05,4.84],
-    ["Byzantine","#CE4676","Byzantine Empire","Eastern Mediterranean","region",41.01,28.98],
+    ["Bavarian Blue","#00304E","Bavaria","Germany","region",48.79,11.5],
+    ["Burgundy","#800020","Burgundy","France","region",47.05,4.84,"https://en.wikipedia.org/wiki/Burgundy_(color)"],
+    ["Old Burgundy","#43302E","Burgundy","France","region",47.05,4.84],
+    ["Byzantine","#BD33A4","Byzantine Empire","E. Mediterranean","region",41.01,28.98],
     ["California Gold","#E3A857","California","USA","region",37.0,-120.0],
     ["California Green","#A18F60","California","USA","region",37.0,-120.0],
     ["Carolina Blue","#56A0D3","Carolinas","USA","region",35.75,-79.02],
-    ["Champagne","#F3E5AB","Champagne","France","region",49.0,4.0,"https://en.wikipedia.org/wiki/Champagne_(color)"],
-    ["Chartreuse","#D1E231","Chartreuse","Dauphine, France","region",45.37,5.72,"https://en.wikipedia.org/wiki/Chartreuse_(color)"],
-    ["Java","#422518","Java (Jawa)","Indonesia","region",-7.6,110.65],
+    ["Champagne","#F7E7CE","Champagne","France","region",49.0,4.0,"https://en.wikipedia.org/wiki/Champagne_(color)"],
+    ["Chartreuse","#DFFF00","Chartreuse","France","region",45.37,5.72,"https://en.wikipedia.org/wiki/Chartreuse_(color)"],
+    ["Java","#422518","Java","Indonesia","region",-7.6,110.65],
     ["Kashmir","#355E3B","Kashmir","India / Pakistan","region",34.0,76.0],
-    ["Levant Red","#AB4E52","Levant","Eastern Mediterranean","region",33.5,36.0],
-    ["Natal Brown","#635147","Natal","KwaZulu-Natal, South Africa","region",-29.6,30.38],
+    ["Levant Red","#AB4E52","Levant","E. Mediterranean","region",33.5,36.0],
+    ["Natal Brown","#635147","Natal","South Africa","region",-29.6,30.38],
     ["Normandy","#00304E","Normandy","France","region",49.0,0.5],
     ["Nubian","#222222","Nubia","Egypt / Sudan","region",21.0,33.0],
-    ["Rose De Provence","#B3446C","Provence","Southeast France","region",43.95,6.07],
-    ["Prussian Blue","#003153","Prussia","Historical N. European state","region",52.5,13.4,"https://en.wikipedia.org/wiki/Prussian_blue"],
-    ["Prussian Green","#004B49","Prussia","Historical N. European state","region",52.5,13.4],
+    ["Rose De Provence","#B3446C","Provence","France","region",43.95,6.07],
+    ["Prussian Blue","#003153","Prussia","Germany / Poland","region",52.5,13.4,"https://en.wikipedia.org/wiki/Prussian_blue"],
+    ["Prussian Green","#004B49","Prussia","Germany / Poland","region",52.5,13.4],
     ["Punjab","#BE6516","Punjab","India / Pakistan","region",30.9,75.85],
     ["Siberian Brown","#6C541E","Siberia","Russia","region",60.0,100.0],
-    ["Tuscan Red","#C09999","Tuscany (Toscana)","Italy","region",43.77,11.25,"https://en.wikipedia.org/wiki/Tuscan_red"],
-    ["Afghan","#3E322C","Afghanistan","Central / South Asia","country",34.5,69.2],
-    ["Afghan Red","#BE0032","Afghanistan","Central / South Asia","country",34.5,69.2],
-    ["Ceylon Blue","#004958","Ceylon (Sri Lanka)","South Asia","country",7.87,80.77],
+    ["Tuscan Red","#7C3030","Tuscany","Italy","region",43.77,11.25,"https://en.wikipedia.org/wiki/Tuscan_red"],
+    ["Afghan","#3E322C","Afghanistan","Central Asia","country",34.5,69.2],
+    ["Afghan Red","#BE0032","Afghanistan","Central Asia","country",34.5,69.2],
+    ["Ceylon Blue","#004958","Ceylon / Sri Lanka","South Asia","country",7.87,80.77],
     ["China Blue","#436B95","China","East Asia","country",35.0,105.0],
     ["China Pink","#DE6FA1","China","East Asia","country",35.0,105.0],
     ["China Rose","#A8516E","China","East Asia","country",35.0,105.0],
     ["China Sea","#66AABC","China","East Asia","country",35.0,105.0],
-    ["Chinese Red","#882D17","China","East Asia","country",35.0,105.0],
+    ["Chinese Red","#AA381E","China","East Asia","country",35.0,105.0],
     ["Chinese Violet","#856088","China","East Asia","country",35.2,105.2],
     ["Old China","#536878","China","East Asia","country",35.0,105.0],
-    ["Congo Brown","#80461B","Congo (DRC)","Central Africa","country",-4.0,24.0],
-    ["Congo Pink","#B4745E","Congo (DRC)","Central Africa","country",-4.0,24.0],
-    ["Light Congo Pink","#F4C2C2","Congo (DRC)","Central Africa","country",-4.0,24.0],
+    ["Congo Brown","#80461B","DR Congo","Central Africa","country",-4.0,24.0],
+    ["Congo Pink","#F88379","DR Congo","Central Africa","country",-4.0,24.0],
+    ["Light Congo Pink","#F4C2C2","DR Congo","Central Africa","country",-4.0,24.0],
     ["Cuban Orchid","#B784A7","Cuba","Caribbean","country",22.0,-79.5],
     ["Cuban Sand","#AE9B82","Cuba","Caribbean","country",22.0,-79.5],
     ["English Blue","#436B95","England","United Kingdom","country",52.0,-1.2],
@@ -505,8 +557,8 @@ const RAW=[
     ["English Ivy","#355E3B","England","United Kingdom","country",52.0,-1.2],
     ["English Violet","#563C5C","England","United Kingdom","country",52.0,-1.2],
     ["Old English Brown","#483C32","England","United Kingdom","country",52.0,-1.2],
-    ["Formosa","#D99058","Formosa (Taiwan)","East Asia","country",23.7,120.96],
-    ["French Blue","#0067A5","France","Western Europe","country",46.6,2.2],
+    ["Formosa","#D99058","Formosa / Taiwan","East Asia","country",23.7,120.96],
+    ["French Blue","#0072BB","France","Western Europe","country",46.6,2.2],
     ["French Gray","#91A3B0","France","Western Europe","country",46.6,2.2],
     ["French Lilac","#86608E","France","Western Europe","country",46.6,2.2],
     ["French Maroon","#905D5D","France","Western Europe","country",46.6,2.2],
@@ -515,16 +567,16 @@ const RAW=[
     ["Hungarian Blue","#436B95","Hungary","Central Europe","country",47.16,19.5],
     ["Hungarian Green","#679267","Hungary","Central Europe","country",47.16,19.5],
     ["Indian Purple","#673147","India","South Asia","country",20.0,77.0],
-    ["Indian Red","#79443B","India","South Asia","country",20.2,77.2,"https://en.wikipedia.org/wiki/Indian_Red"],
+    ["Indian Red","#882D17","India","South Asia","country",20.2,77.2,"https://en.wikipedia.org/wiki/Indian_Red"],
     ["Indian Saffron","#F8DE7E","India","South Asia","country",20.0,77.0],
     ["Indian Yellow","#E3A857","India","South Asia","country",19.8,76.8,"https://en.wikipedia.org/wiki/Indian_yellow"],
-    ["Indigo","#4B0082","India (Indus Valley)","South Asia","country",20.0,77.0,"https://en.wikipedia.org/wiki/Indigo"],
+    ["Indigo","#00416A","Indus Valley","South Asia","country",20.0,77.0,"https://en.wikipedia.org/wiki/Indigo_dye"],
     ["Irish Isle","#27A64C","Ireland","Western Europe","country",53.35,-6.26],
     ["Italian Blue","#0085A1","Italy","Southern Europe","country",42.5,12.5],
     ["Japan Rose","#D9A6A9","Japan","East Asia","country",36.2,138.25],
     ["Japanese Blue","#5E716A","Japan","East Asia","country",36.2,138.25],
     ["Japanese Violet","#5B3256","Japan","East Asia","country",36.2,138.25],
-    ["Maya Blue","#73C2FB","Maya Civilization","Mesoamerica","country",17.0,-92.0,"https://en.wikipedia.org/wiki/Maya_blue"],
+    ["Maya Blue","#73C2FB","Maya region","Mesoamerica","country",17.0,-92.0,"https://en.wikipedia.org/wiki/Maya_blue"],
     ["Mexican Pink","#E4007C","Mexico","North America","country",23.63,-102.55],
     ["Morocco","#3E322C","Morocco","North Africa","country",32.0,-5.0],
     ["Morocco Red","#722F37","Morocco","North Africa","country",32.0,-5.0],
@@ -534,129 +586,124 @@ const RAW=[
     ["Dutch Cream","#FAD6A5","Netherlands","Western Europe","country",52.37,4.9],
     ["Dutch Orange","#EAA221","Netherlands","Western Europe","country",52.37,4.9],
     ["Holland Blue","#00304E","Netherlands","Western Europe","country",52.37,4.9],
-    ["Persian Blue","#32127A","Persia (Iran)","Middle East","country",32.0,53.0,"https://en.wikipedia.org/wiki/Persian_blue"],
-    ["Persian Green","#3A4B47","Persia (Iran)","Middle East","country",32.1,53.1],
-    ["Persian Lilac","#C17E91","Persia (Iran)","Middle East","country",32.0,53.0],
-    ["Persian Melon","#B4745E","Persia (Iran)","Middle East","country",32.0,53.0],
-    ["Persian Orange","#D99058","Persia (Iran)","Middle East","country",32.2,53.2],
-    ["Persian Pink","#A8516E","Persia (Iran)","Middle East","country",32.0,53.0],
-    ["Persian Red","#CC3333","Persia (Iran)","Middle East","country",31.8,52.8],
-    ["Persian Rose","#CE4676","Persia (Iran)","Middle East","country",31.9,52.9],
-    ["Persian Yellow","#E25822","Persia (Iran)","Middle East","country",32.0,53.0],
+    ["Persian Blue","#1C39BB","Persia / Iran","Middle East","country",32.0,53.0,"https://en.wikipedia.org/wiki/Persian_blue"],
+    ["Persian Green","#00A693","Persia / Iran","Middle East","country",32.1,53.1],
+    ["Persian Lilac","#C17E91","Persia / Iran","Middle East","country",32.0,53.0],
+    ["Persian Melon","#B4745E","Persia / Iran","Middle East","country",32.0,53.0],
+    ["Persian Orange","#D99058","Persia / Iran","Middle East","country",32.2,53.2],
+    ["Persian Pink","#F77FBE","Persia / Iran","Middle East","country",32.0,53.0],
+    ["Persian Red","#CC3333","Persia / Iran","Middle East","country",31.8,52.8],
+    ["Persian Rose","#FE28A2","Persia / Iran","Middle East","country",31.9,52.9],
+    ["Persian Yellow","#E25822","Persia / Iran","Middle East","country",32.0,53.0],
     ["Peruvian Yellow","#CB6D51","Peru","South America","country",-12.0,-77.0],
     ["Dark Russian Green","#5E716A","Russia","Eurasia","country",55.75,37.62],
     ["Russian Blue","#91A3B0","Russia","Eurasia","country",55.75,37.62],
     ["Russian Grey","#8A8776","Russia","Eurasia","country",55.75,37.62],
     ["Russian Violet","#32174D","Russia","Eurasia","country",55.75,37.62],
     ["Scotch Blue","#252440","Scotland","United Kingdom","country",56.49,-4.2],
-    ["Siam Sand","#C2B280","Siam (Thailand)","Southeast Asia","country",15.0,101.0],
-    ["Spanish White","#FAD6A5","Spain","Iberian Peninsula","country",40.42,-3.7],
-    ["Spanish Yellow","#EAA221","Spain","Iberian Peninsula","country",40.42,-3.7],
+    ["Siam Sand","#C2B280","Siam / Thailand","Southeast Asia","country",15.0,101.0],
+    ["Spanish White","#FAD6A5","Spain","Iberia","country",40.42,-3.7],
+    ["Spanish Yellow","#EAA221","Spain","Iberia","country",40.42,-3.7],
     ["Swedish Green","#7E9F2E","Sweden","Scandinavia","country",59.33,18.07],
     ["Swiss Rose","#AB4E52","Switzerland","Central Europe","country",46.95,7.45],
-    ["Turkey Red","#A91101","Turkey (Turkiye)","Anatolia","country",39.2,35.2,"https://en.wikipedia.org/wiki/Turkey_red"],
-    ["Turquoise","#40E0D0","Turkey (Turkiye)","Anatolia","country",39.0,35.0,"https://en.wikipedia.org/wiki/Turquoise"],
-    ["Turkish Blue","#4C516D","Turkey (T\u00fcrkiye)","Anatolia","country",39.0,35.0],
-    ["Turkish Crescent Red","#841B2D","Turkey (T\u00fcrkiye)","Anatolia","country",39.0,35.0],
-    ["Adriatic","#317873","Adriatic Sea","Mediterranean Europe","water",43.0,16.0],
+    ["Turkey Red","#A91101","Türkiye","Anatolia","country",39.2,35.2,"https://en.wikipedia.org/wiki/Turkey_red"],
+    ["Turquoise","#40E0D0","Türkiye","Anatolia","country",39.0,35.0,"https://en.wikipedia.org/wiki/Turquoise"],
+    ["Turkish Blue","#4C516D","Türkiye","Anatolia","country",39.0,35.0],
+    ["Turkish Crescent Red","#841B2D","Türkiye","Anatolia","country",39.0,35.0],
+    ["Adriatic","#317873","Adriatic Sea","Mediterranean","water",43.0,16.0],
     ["Amazon","#3B7A57","Amazon River","South America","water",-3.0,-60.0],
-    ["Arctic Blue","#536878","Arctic Ocean","North Polar region","water",85.0,0.0],
+    ["Arctic Blue","#536878","Arctic Ocean","Arctic","water",85.0,0.0],
     ["Atlantic","#36454F","Atlantic Ocean","Global","water",20.0,-30.0],
     ["Baltic","#3A4B47","Baltic Sea","Northern Europe","water",58.5,20.0],
     ["Bosphorus","#3A4B47","Bosphorus Strait","Turkey","water",41.12,29.07],
     ["Congo Blue","#536878","Congo River","Central Africa","water",-4.0,15.3],
     ["Blue Danube","#007791","Danube River","Central Europe","water",47.5,19.0],
     ["Danube Green","#355E3B","Danube River","Central Europe","water",47.5,19.0],
-    ["Superior","#004B49","Lake Superior","USA / Canada","water",47.5,-85.0],
-    ["Victoria Blue","#0E6FA8","Lake Victoria","East Africa","water",-1.0,33.0,"https://en.wikipedia.org/wiki/Victoria_blue"],
     ["Eau-De-Nile","#8A9A5B","Nile River","Egypt / Sudan","water",26.0,32.0],
     ["Nile Blue","#66ADA4","Nile River","Egypt / Sudan","water",26.0,32.0,"https://en.wikipedia.org/wiki/Nile_blue"],
     ["Pale Nile Blue","#96DED1","Nile River","Egypt / Sudan","water",26.0,32.0],
     ["Pacific","#8DA399","Pacific Ocean","Global","water",0.0,-160.0],
     ["Pacific Blue","#1CA9C9","Pacific Ocean","Global","water",0.0,-160.0],
-    ["Cadmium Vermilion","#BC3F4A","Almad\u00e9n","Castilla-La Mancha, Spain","pigment",38.77,-4.83],
-    ["Scarlet Vermilion","#E25822","Almad\u00e9n","Castilla-La Mancha, Spain","pigment",38.77,-4.83],
-    ["Vermilion","#D9381E","Almad\u00e9n","Castilla-La Mancha, Spain","pigment",38.77,-4.83,"https://en.wikipedia.org/wiki/Vermilion"],
+    ["Scarlet Vermilion","#E25822","Almadén","Spain","pigment",38.77,-4.83],
+    ["Vermilion","#E34234","Almadén","Spain","pigment",38.77,-4.83,"https://en.wikipedia.org/wiki/Vermilion"],
     ["Lapis Lazuli","#26619C","Badakhshan","Afghanistan","pigment",36.7,71.3,"https://en.wikipedia.org/wiki/Lapis_lazuli"],
-    ["Gamboge","#E49B0F","Cambodia (Gambogia)","Southeast Asia","pigment",12.57,104.99,"https://en.wikipedia.org/wiki/Gamboge"],
-    ["Cologne Earth","#6F4E37","Cologne (K\u00f6ln)","NRW, Germany","pigment",50.94,6.96],
-    ["Cyprus Earth","#826644","Cyprus","Eastern Mediterranean","pigment",35.13,33.43],
-    ["Ocher Red","#905D5D","Earth pigment","Global","pigment",43.32,11.33],
+    ["Gamboge","#E49B0F","Cambodia","Southeast Asia","pigment",12.57,104.99,"https://en.wikipedia.org/wiki/Gamboge"],
+    ["Cologne Earth","#6F4E37","Cologne","Germany","pigment",50.94,6.96],
+    ["Cyprus Earth","#826644","Cyprus","E. Mediterranean","pigment",35.13,33.43],
     ["Egyptian Blue","#1034A6","Egypt","North Africa","pigment",26.0,30.0,"https://en.wikipedia.org/wiki/Egyptian_blue"],
     ["Egyptian Brown","#483C32","Egypt","North Africa","pigment",26.0,30.0],
     ["Egyptian Green","#3B7861","Egypt","North Africa","pigment",26.0,30.0],
     ["Egyptian Red","#722F37","Egypt","North Africa","pigment",26.0,30.0],
     ["English Ochre","#E3A857","England","United Kingdom","pigment",52.0,-1.2],
-    ["Florence Earth","#79443B","Florence (Firenze)","Tuscany, Italy","pigment",43.77,11.26],
+    ["Florence Earth","#79443B","Florence","Italy","pigment",43.77,11.26],
     ["Burnt Italian Earth","#9E4732","Italy","Southern Europe","pigment",42.5,12.5],
     ["Italian Ochre","#AE6938","Italy","Southern Europe","pigment",42.5,12.5],
     ["Raw Italian Earth","#AE6938","Italy","Southern Europe","pigment",42.5,12.5],
-    ["Japan Earth","#6F4E37","Japan","East Asia","pigment",36.2,138.25],
+    ["Japan Earth","#6F4E37","Malay Peninsula","Southeast Asia","pigment",3.5,102.0],
     ["Burnt Carmine","#841B2D","Oaxaca","Mexico","pigment",17.07,-96.73],
     ["Carmine","#960018","Oaxaca","Mexico","pigment",17.07,-96.73,"https://en.wikipedia.org/wiki/Carmine"],
     ["Violet Carmine","#673147","Oaxaca","Mexico","pigment",17.07,-96.73],
-    ["Burnt Roman Ochre","#ED872D","Rome","Lazio, Italy","pigment",41.9,12.5],
-    ["Roman Green","#665D1E","Rome","Lazio, Italy","pigment",41.9,12.5],
-    ["Roman Purple","#604E81","Rome","Lazio, Italy","pigment",41.9,12.5],
-    ["Burnt Sienna","#E97451","Siena","Tuscany, Italy","pigment",43.34,11.35,"https://en.wikipedia.org/wiki/Sienna"],
-    ["Raw Sienna","#AE6938","Siena","Tuscany, Italy","pigment",43.32,11.33],
-    ["Siena","#882D17","Siena","Tuscany, Italy","pigment",43.32,11.33],
-    ["Sienna","#882D17","Siena","Tuscany, Italy","pigment",43.32,11.33,"https://en.wikipedia.org/wiki/Sienna"],
-    ["Tyrian Purple","#66023C","Tyre (Sur)","Lebanon","pigment",33.27,35.2,"https://en.wikipedia.org/wiki/Tyrian_purple"],
-    ["Burnt Umber","#8A3324","Umbria","Central Italy","pigment",43.09,12.37,"https://en.wikipedia.org/wiki/Umber"],
-    ["Raw Umber","#635147","Umbria","Central Italy","pigment",43.11,12.39,"https://en.wikipedia.org/wiki/Umber"],
+    ["Burnt Roman Ochre","#ED872D","Rome","Italy","pigment",41.9,12.5],
+    ["Roman Green","#665D1E","Rome","Italy","pigment",41.9,12.5],
+    ["Roman Purple","#604E81","Rome","Italy","pigment",41.9,12.5],
+    ["Burnt Sienna","#E97451","Siena","Italy","pigment",43.34,11.35,"https://en.wikipedia.org/wiki/Sienna"],
+    ["Raw Sienna","#D68A59","Siena","Italy","pigment",43.32,11.33],
+    ["Siena","#882D17","Siena","Italy","pigment",43.32,11.33],
+    ["Sienna","#882D17","Siena","Italy","pigment",43.32,11.33,"https://en.wikipedia.org/wiki/Sienna"],
+    ["Tyrian Purple","#66023C","Tyre","Lebanon","pigment",33.27,35.2,"https://en.wikipedia.org/wiki/Tyrian_purple"],
+    ["Burnt Umber","#8A3324","Umbria","Italy","pigment",43.09,12.37,"https://en.wikipedia.org/wiki/Umber"],
+    ["Raw Umber","#826644","Umbria","Italy","pigment",43.11,12.39,"https://en.wikipedia.org/wiki/Umber"],
     ["Pampas","#5B504F","Pampas","Argentina","region",-34.0,-62.0],
-    ["Victoria Green","#6AAB8E","Lake Victoria","East Africa","water",-1.0,33.0],
-    ["Victoria","#563C5C","Lake Victoria","East Africa","water",-1.02,33.02],
     ["Nile Green","#8A9A5B","Nile River","Egypt / Sudan","water",26.0,32.0],
-    ["Pale Congo Pink","#F4C2C2","Congo (DRC)","Central Africa","country",-4.0,24.0],
+    ["Pale Congo Pink","#F4C2C2","DR Congo","Central Africa","country",-4.0,24.0],
     ["Scotch Grey","#8F9779","Scotland","United Kingdom","country",56.49,-4.2],
     ["Scotch Mist","#B2BEB5","Scotland","United Kingdom","country",57.0,-4.5],
     ["Alpine Blue","#B3BCE2","Alps","Central Europe","region",46.5,9.5],
     ["Light Danube Green","#3B7861","Danube River","Central Europe","water",47.5,19.1],
-    ["Ultramarine","#4166F5","Badakhshan","Afghanistan","pigment",36.7,71.3],
+    ["Ultramarine","#120A8F","Badakhshan","Afghanistan","pigment",36.7,71.3],
     ["Violet Ultramarine","#545AA7","Badakhshan","Afghanistan","pigment",36.72,71.32],
     ["Ultramarine Green","#1E2321","Badakhshan","Afghanistan","pigment",36.74,71.34],
-    ["Roman Violet","#5D3954","Rome","Lazio, Italy","pigment",41.9,12.5],
-    ["Roman Rose","#43302E","Rome","Lazio, Italy","city",41.92,12.5],
-    ["Saccardo's Umber","#7E6D5A","Umbria","Central Italy","pigment",43.11,12.39],
-    ["Burnt Italian Ochre","#9E4732","Italy","Central Italy","pigment",43.5,12.0],
-    ["Cadmium Carmine","#BC3F4A","Oaxaca","Mexico","pigment",17.07,-96.73],
-    ["Venice Blue","#96DED1","Venice","Veneto, Italy","city",45.44,12.32],
-    ["Venetian Fuchsia","#CE4676","Venice","Veneto, Italy","city",45.44,12.33],
+    ["Roman Violet","#5D3954","Rome","Italy","pigment",41.9,12.5],
+    ["Roman Rose","#43302E","Rome","Italy","city",41.92,12.5],
+    ["Saccardo's Umber","#7E6D5A","Umbria","Italy","pigment",43.11,12.39],
+    ["Burnt Italian Ochre","#9E4732","Italy","Italy","pigment",43.5,12.0],
+    ["Venice Blue","#96DED1","Venice","Italy","city",45.44,12.32],
+    ["Venetian Fuchsia","#CE4676","Venice","Italy","city",45.44,12.33],
     ["Tuscan Sand","#967117","Tuscany","Italy","region",43.77,11.25],
     ["Tuscan Tan","#A67B5B","Tuscany","Italy","region",43.79,11.27],
     ["Champagne Buff","#F3E5AB","Champagne","France","region",49.0,4.0],
-    ["Chartreuse Green","#98943E","Chartreuse","Dauphin\u00e9, France","region",45.37,5.72],
+    ["Chartreuse Green","#98943E","Chartreuse","France","region",45.37,5.72],
     ["Burgundy Violet","#875692","Burgundy","France","region",47.05,4.84],
     ["French Green","#679267","France","Western Europe","country",46.6,2.2],
     ["French Nude","#977F73","France","Western Europe","country",46.62,2.22],
     ["French Purple","#A8516E","France","Western Europe","country",46.65,2.23],
     ["French White","#BFB9BD","France","Western Europe","country",46.63,2.21],
-    ["Paris Yellow","#D4AF37","Paris","\u00cele-de-France, France","city",48.85,2.35],
-    ["Light Paris Green","#93C592","Paris","\u00cele-de-France, France","city",48.85,2.36],
-    ["Normandy Blue","#8DA399","Normandy","Normandy, France","region",49.18,0.37],
-    ["Chelsea Yellow","#EAE679","Chelsea","London, England","city",51.49,-0.17],
+    ["Paris Yellow","#D4AF37","Paris","France","city",48.85,2.35],
+    ["Light Paris Green","#93C592","Paris","France","city",48.85,2.36],
+    ["Normandy Blue","#8DA399","Normandy","France","region",49.18,0.37],
+    ["Chelsea Yellow","#EAE679","Chelsea","London, UK","city",51.49,-0.17],
     ["English Mist","#7D8984","England","United Kingdom","country",52.0,-1.2],
     ["English Inde","#50404D","England","United Kingdom","country",52.02,-1.22],
     ["Pale Windsor Blue","#70A3CC","Windsor","England, UK","city",51.48,-0.63],
-    ["Light Windsor Blue","#8791BF","Windsor","Berkshire, England","city",51.49,-0.64],
+    ["Light Windsor Blue","#8791BF","Windsor","England, UK","city",51.49,-0.64],
     ["Saxony Green","#008856","Saxony","Germany","region",51.1,13.2],
     ["Pale Russian Blue","#BCD4E6","Russia","Eurasia","country",55.75,37.62],
-    ["Pale Persian Lilac","#D597AE","Persia (Iran)","Middle East","country",32.0,53.0],
-    ["Seville","#32174D","Seville","Andalusia, Spain","city",37.39,-5.99],
+    ["Pale Persian Lilac","#D597AE","Persia / Iran","Middle East","country",32.0,53.0],
+    ["Seville","#32174D","Seville","Spain","city",37.39,-5.99],
     ["Indian Pink","#A87C6D","India","South Asia","country",20.0,77.0],
     ["Indian Tan","#996515","India","South Asia","country",20.02,77.02],
     ["India Red","#56070C","India","South Asia","country",20.04,77.04],
-    ["India Ink","#555555","India","South Asia","pigment",20.06,77.06],
+    ["India Ink","#555555","China","East Asia","pigment",34.8,104.8],
     ["Chinese Green","#1B4D3E","China","East Asia","country",36.2,103.8],
     ["Japanese Yellow","#FFB7A5","Japan","East Asia","country",36.2,138.25],
     ["Java Brown","#3E322C","Java","Indonesia","country",-7.0,110.0],
     ["Aztec Maroon","#915F6D","Aztec Empire","Mesoamerica","region",19.43,-99.13],
-    ["Rio Grande","#C2B280","Rio de Janeiro","Brazil","city",-22.9,-43.17],
+    ["Rio Grande","#C2B280","Rio Grande do Sul","Southern Brazil","region",-30.0,-53.5],
     ["Dutch Pink","#FADA5E","Netherlands","Western Europe","country",52.37,4.9],
     ["Dutch Azure","#00416A","Netherlands","Western Europe","country",52.39,4.92]
 ];
+
+function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));}
 
 /* ── HSV ── */
 function hsv(hex){
@@ -666,8 +713,8 @@ function hsv(hex){
   return[Math.round(h*360),Math.round(s*100),Math.round(v*100)];
 }
 
-const BL={city:'b-city',region:'b-region',country:'b-country',water:'b-water',pigment:'b-pigment'};
-const BN={city:'City / Town',region:'Region / Province',country:'Country / Empire',water:'Water Body',pigment:'Pigment & Earth Source'};
+const BL={city:'b-city',region:'b-region',country:'b-country',water:'b-water',pigment:'b-pigment',egg:'b-egg'};
+const BN={city:'City / Town',region:'Region / Province',country:'Country / Empire',water:'Water Body',pigment:'Pigment & Earth Source',egg:'Easter egg'};
 const COLORS=RAW.map((r,i)=>{
   const[h,s,v]=hsv(r[1]);
   const rb=parseInt(r[1].slice(1,3),16),gb=parseInt(r[1].slice(3,5),16),bb=parseInt(r[1].slice(5,7),16);
@@ -718,15 +765,14 @@ function jitteredLatLng(c,z){
 
 let cat='',srtK='h',srtD=1,selIdx=-1;
 const markers=[];
-let lightTile,darkTile,isDark=false;
+let isDark=false;
 
 /* ── THEME ── */
 function toggleTheme(){
   isDark=!isDark;
   document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
   document.getElementById('themeBtn').innerHTML=isDark?'&#x25D1; Light':'&#x25D1; Dark';
-  if(isDark){if(lightTile)map.removeLayer(lightTile);darkTile.addTo(map);}
-  else{if(darkTile)map.removeLayer(darkTile);lightTile.addTo(map);}
+  setBasemap(basemapFor(isDark));
   try{localStorage.setItem('gc-theme',isDark?'dark':'light');}catch(e){}
 }
 
@@ -753,27 +799,75 @@ function toggleCredits(){
 
 /* ── TABLE CSV EXPORT ── */
 function exportCSV(){
-  const q=document.getElementById('srch').value.toLowerCase();
-  let fd=COLORS.filter(c=>{
-    if(cat&&c.cat!==cat)return false;
-    if(!q)return true;
-    return c.n.toLowerCase().includes(q)||c.pl.toLowerCase().includes(q)||c.cx.toLowerCase().includes(q)||c.hex.toLowerCase().includes(q);
-  });
-  fd.sort((a,b)=>{let av=a[srtK],bv=b[srtK];if(typeof av==='string')return srtD*av.localeCompare(bv);return srtD*(av-bv);});
+  const fd=filtered();
   const hdr=['Colour Name','Place','Context','Type','H (deg)','S (%)','V (%)','Luminance (%)','Hex','Latitude','Longitude'];
   const rows=fd.map(c=>[c.n,c.pl,c.cx,BN[c.cat],c.h,c.s,c.v,c.lum,c.hex,c.la,c.lo]);
   const csv=[hdr,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='geographic-colours'+(cat?'-'+cat:'')+(fd.length<COLORS.length?'-filtered':'')+'.csv';
-  a.click();URL.revokeObjectURL(a.href);
+  a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
 }
 
 /* ── MAP ── */
 const map=L.map('map',{zoomControl:true,preferCanvas:true}).setView([20,10],2);
-const tOpts={maxZoom:18,subdomains:'abcd',attribution:'&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com">CARTO</a>'};
-lightTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',tOpts).addTo(map);
-darkTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',tOpts);
+/* ── BASEMAPS (all keyless) ──
+   Vector basemaps: OpenFreeMap (OpenMapTiles schema, no key, no request limit),
+   rendered through MapLibre GL — the same setup as Map-o-matic. OSM's own tile
+   server is not used: its policy blocks requests without a referrer, which
+   includes local files and the exported HTML map.
+   Light and dark themes each remember their own basemap choice. */
+const OSM_ATTR='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+const OFM_ATTR=OSM_ATTR+' &middot; &copy; <a href="https://openmaptiles.org">OpenMapTiles</a> &middot; <a href="https://openfreemap.org">OpenFreeMap</a>';
+const ESRI='https://server.arcgisonline.com/ArcGIS/rest/services/';
+function esri(path,o){return L.tileLayer(ESRI+path+'/MapServer/tile/{z}/{y}/{x}',o);}
+const ESRI_CANVAS_ATTR='Tiles &copy; <a href="https://www.esri.com">Esri</a> &mdash; Esri, HERE, Garmin, '+OSM_ATTR;
+/* preserveDrawingBuffer at the top level so the GL canvas prints (Map PDF) */
+function ofm(style){return L.maplibreGL({style:'https://tiles.openfreemap.org/styles/'+style,attribution:OFM_ATTR,interactive:false,preserveDrawingBuffer:true});}
+const HAS_GL=!!(window.L&&L.maplibreGL&&window.maplibregl);
+const BASEMAPS=HAS_GL?{
+  'ofm-positron':{label:'Positron (light)',layer:ofm('positron')},
+  'ofm-liberty':{label:'Liberty',layer:ofm('liberty')},
+  'ofm-bright':{label:'Bright',layer:ofm('bright')},
+  'ofm-dark':{label:'Dark',layer:ofm('dark')}
+}:{ /* fallback if MapLibre fails to load: raster equivalents */
+  'ofm-positron':{label:'Light grey (Esri)',layer:L.layerGroup([esri('Canvas/World_Light_Gray_Base',{maxZoom:16,attribution:ESRI_CANVAS_ATTR}),esri('Canvas/World_Light_Gray_Reference',{maxZoom:16})])},
+  'ofm-dark':{label:'Dark grey (Esri)',layer:L.layerGroup([esri('Canvas/World_Dark_Gray_Base',{maxZoom:16,attribution:ESRI_CANVAS_ATTR}),esri('Canvas/World_Dark_Gray_Reference',{maxZoom:16})])}
+};
+BASEMAPS['esri-imagery']={label:'Satellite (Esri)',layer:L.layerGroup([
+  esri('World_Imagery',{maxZoom:19,attribution:'Imagery &copy; <a href="https://www.esri.com">Esri</a> &mdash; Esri, Maxar, Earthstar Geographics, and the GIS User Community'}),
+  esri('Reference/World_Boundaries_and_Places',{maxZoom:19})])};
+BASEMAPS['topo']={label:'Topographic (OpenTopoMap)',layer:L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:17,subdomains:'abc',attribution:'Map data: '+OSM_ATTR+', SRTM &middot; Style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)'})};
+const BASE_DEFAULT={light:'ofm-positron',dark:'ofm-dark'};
+function basemapFor(dark){
+  const t=dark?'dark':'light';
+  try{const k=localStorage.getItem('gc-base-'+t);if(BASEMAPS[k])return k;}catch(e){}
+  return BASE_DEFAULT[t];
+}
+let curBase=null,baseSwitching=false;
+function setBasemap(key){
+  if(!BASEMAPS[key]||key===curBase)return;
+  baseSwitching=true;
+  if(curBase)map.removeLayer(BASEMAPS[curBase].layer);
+  BASEMAPS[key].layer.addTo(map);
+  BASEMAPS[key].layer.bringToBack&&BASEMAPS[key].layer.bringToBack();
+  curBase=key;
+  baseSwitching=false;
+}
+const baseLayersCtl={};
+Object.keys(BASEMAPS).forEach(k=>{baseLayersCtl[BASEMAPS[k].label]=BASEMAPS[k].layer;});
+setBasemap(basemapFor(false));
+const layersCtl=L.control.layers(baseLayersCtl,null,{position:'topright',collapsed:true}).addTo(map);
+(function(){const b=layersCtl.getContainer().querySelector('.leaflet-control-layers-base');
+  if(b){const t=L.DomUtil.create('div','bm-title');t.textContent='Basemap';b.parentNode.insertBefore(t,b);}
+  layersCtl.getContainer().querySelector('.leaflet-control-layers-toggle').title='Change basemap';})();
+map.on('baselayerchange',e=>{
+  if(baseSwitching)return;
+  const key=Object.keys(BASEMAPS).find(k=>BASEMAPS[k].layer===e.layer);
+  if(!key)return;
+  curBase=key;
+  try{localStorage.setItem('gc-base-'+(isDark?'dark':'light'),key);}catch(ex){}
+});
 
 /* ── MAP INFO CONTROL ── */
 const infoCtrl=L.control({position:'bottomleft'});
@@ -789,7 +883,7 @@ infoCtrl.addTo(map);
 function updateInfoCtrl(c){
   const d=document.getElementById('mapInfo');
   if(!c){d.innerHTML='<div class="mi-empty">click a marker or table row</div>';return;}
-  const inPal=palette.some(p=>p.hex===c.hex);
+  const inPal=palette.some(p=>p.i===c.i);
   d.innerHTML=
     '<a class="mi-swatch" href="https://www.color-hex.com/color/'+c.hex.slice(1)+'" target="_blank" rel="noopener" title="View on color-hex.com" style="background:'+c.hex+'">'+
       '<div class="mi-label"><div class="mi-name">'+c.n+'</div><div class="mi-code">'+c.hex+'</div></div>'+
@@ -867,47 +961,91 @@ function setcat(c){
   go();
 }
 
-const sortChipIds={h:'chip-hue',s:'chip-sat',v:'chip-val',la:'chip-la',lo:'chip-lo'};
+/* default direction per key: N→S for latitude, high→low for S/V/Lum */
+const SORT_DEF={s:-1,v:-1,lum:-1,la:-1};
 function setSrt(k,d){
-  if(srtK===k)srtD*=-1;else{srtK=k;srtD=d||1;}
-  Object.values(sortChipIds).forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('on');});
-  if(sortChipIds[k])document.getElementById(sortChipIds[k]).classList.add('on');
+  if(srtK===k)srtD*=-1;else{srtK=k;srtD=d||SORT_DEF[k]||1;}
   go();
 }
+function flipSort(){srtD*=-1;go();}
+function syncSortUI(){
+  const sel=document.getElementById('sortSel');if(sel)sel.value=srtK;
+  const b=document.getElementById('sortDir');
+  if(b){b.innerHTML=srtK==='lo'?(srtD>0?'&#x2192;':'&#x2190;'):(srtD>0?'&#x2191;':'&#x2193;');
+    const L={la:srtD>0?'South \u2192 North':'North \u2192 South',lo:srtD>0?'West \u2192 East':'East \u2192 West'};
+    b.title=(L[srtK]||(srtD>0?'Ascending':'Descending'))+' \u2014 click to reverse';}
+}
 
-function go(){
+/* ── FILTERED SET (shared by table, CSV and map exports) ── */
+function filtered(){
   const q=document.getElementById('srch').value.toLowerCase();
-  let fd=COLORS.filter(c=>{
+  const fd=COLORS.filter(c=>{
     if(cat&&c.cat!==cat)return false;
     if(!q)return true;
     return c.n.toLowerCase().includes(q)||c.pl.toLowerCase().includes(q)||c.cx.toLowerCase().includes(q)||c.hex.toLowerCase().includes(q);
   });
   fd.sort((a,b)=>{let av=a[srtK],bv=b[srtK];if(typeof av==='string')return srtD*av.localeCompare(bv);return srtD*(av-bv);});
-  ['n','hx','pl','cat','la','lo','h','s','v','lum'].forEach(k=>{
-    const el=document.getElementById('si-'+k);
-    if(el)el.textContent=srtK===k?(srtD>0?' \u2191':' \u2193'):'';
-  });
-  const total=COLORS.length;
-  document.getElementById('hcnt').textContent=fd.length===total?total+' colours':fd.length+'/'+total;
+  return fd;
+}
+
+/* ── RESPONSIVE COLUMNS: Place/context always visible ──
+   p = priority; higher numbers are hidden first as the pane narrows. */
+const COLS=[
+  {k:'sw', w:32, p:0,l:''},
+  {k:'n',  w:0,  p:0,l:'Colour name'},
+  {k:'pl', w:225,p:0,l:'Place / context'},
+  {k:'cat',w:104,p:2,l:'Type'},
+  {k:'h',  w:55, p:3,l:'H&#xB0;',t:'Hue (0\u2013360)',r:1},
+  {k:'s',  w:52, p:4,l:'S%',t:'Saturation'},
+  {k:'v',  w:52, p:4,l:'V%',t:'Brightness (value)'},
+  {k:'lum',w:52, p:4,l:'Lum%',t:'Perceptual luminance'},
+  {k:'hex',w:70, p:1,l:'Hex'}
+];
+const NAME_MIN=130; /* the name column takes the remaining width */
+let colLevel=-1,forceAllCols=false;
+function visCols(){const lv=forceAllCols?9:colLevel;return COLS.filter(c=>c.p<=lv);}
+function buildHead(){
+  const vc=visCols();
+  document.getElementById('cg').innerHTML=vc.map(c=>'<col'+(c.w?' style="width:'+c.w+'px"':'')+'>').join('');
+  document.getElementById('thr').innerHTML=vc.map(c=>c.k==='sw'?'<th></th>':
+    '<th'+(c.r?' class="r"':'')+(c.t?' title="'+c.t+'"':'')+' onclick="setSrt(\''+c.k+'\')">'+c.l+' <span class="si" id="si-'+c.k+'"></span></th>').join('');
+}
+function fitCols(){
+  const w=document.getElementById('tpane').clientWidth;
+  let lv=4;
+  while(lv>0&&COLS.filter(c=>c.p<=lv).reduce((a,c)=>a+c.w,0)+NAME_MIN>w)lv--;
+  if(lv!==colLevel){colLevel=lv;buildHead();go();}
+}
+const CELL={
+  sw:c=>'<td><span class="sw" style="background:'+c.hex+'"></span><button class="add-pal" onclick="addToPalette('+c.i+',event)" title="Add to palette">+</button></td>',
+  n:c=>'<td><span class="cn">'+c.n+'</span></td>',
+  pl:c=>'<td title="'+esc(c.pl+' '+fmtLL(c)+(c.cx?' \u2014 '+c.cx:''))+'"><span class="pl">'+c.pl+(c.cat==='egg'?'':' <span class="ll">('+fmtLL(c)+')</span>')+'</span><span class="cx">'+c.cx+'</span></td>',
+  cat:c=>'<td><span class="badge '+BL[c.cat]+'">'+BN[c.cat]+'</span></td>',
+  h:c=>'<td style="text-align:right"><span class="hd" style="background:hsl('+c.h+',100%,50%)"></span><span class="nm" style="display:inline">'+c.h+'</span></td>',
+  s:c=>'<td><span class="nm">'+c.s+'</span><div class="bar"><div class="bf" style="width:'+c.s+'%;background:hsl('+c.h+',60%,40%)"></div></div></td>',
+  v:c=>'<td><span class="nm">'+c.v+'</span><div class="bar"><div class="bf" style="width:'+c.v+'%;background:var(--ink-mid)"></div></div></td>',
+  lum:c=>'<td><span class="nm">'+c.lum+'</span><div class="bar"><div class="bf" style="width:'+c.lum+'%;background:var(--ink-mid)"></div></div></td>',
+  hex:c=>'<td><span class="hx">'+c.hex+'</span></td>'
+};
+function fmtLL(c){return Math.abs(c.la).toFixed(1)+'\u00B0'+(c.la>=0?'N':'S')+', '+Math.abs(c.lo).toFixed(1)+'\u00B0'+(c.lo>=0?'E':'W');}
+
+function go(){
+  if(colLevel<0)return; /* columns not sized yet */
+  const fd=filtered();
+  syncSortUI();
+  COLS.forEach(c=>{const el=document.getElementById('si-'+c.k);if(el)el.textContent=srtK===c.k?(srtD>0?' \u2191':' \u2193'):'';});
+  const nGeo=COLORS.filter(c=>c.cat!=='egg').length;
+  const nShown=fd.filter(c=>c.cat!=='egg').length;
+  document.getElementById('hcnt').textContent=nShown===nGeo?nGeo+' colours':nShown+'/'+nGeo;
+  document.querySelectorAll('.n-total').forEach(el=>el.textContent=nGeo);
+  const vc=visCols();
   document.getElementById('tb').innerHTML=fd.map(c=>
-    '<tr id="r'+c.i+'" onclick="selectColor('+c.i+',true)"'+(c.i===selIdx?' class="sel"':'')+'>'+
-    '<td><span class="sw" style="background:'+c.hex+'"></span><button class="add-pal" onclick="addToPalette('+c.i+',event)" title="Add to palette">+</button></td>'+
-    '<td><span class="cn">'+c.n+'</span></td>'+
-    '<td><span class="pl">'+c.pl+'</span><span class="cx">'+c.cx+'</span></td>'+
-    '<td><span class="badge '+BL[c.cat]+'">'+BN[c.cat]+'</span></td>'+
-    '<td style="text-align:right"><span class="hd" style="background:hsl('+c.h+',100%,50%)"></span><span class="nm">'+c.h+'</span></td>'+
-    '<td><span class="nm">'+c.s+'</span><div class="bar"><div class="bf" style="width:'+c.s+'%;background:hsl('+c.h+',60%,40%)"></div></div></td>'+
-    '<td><span class="nm">'+c.v+'</span><div class="bar"><div class="bf" style="width:'+c.v+'%;background:var(--ink-mid)"></div></div></td>'+
-    '<td><span class="nm">'+c.lum+'</span><div class="bar"><div class="bf" style="width:'+c.lum+'%;background:var(--ink-mid)"></div></div></td>'+
-    '<td><span class="hx">'+c.hex+'</span></td>'+
-    '<td class="co">'+c.la.toFixed(2)+'&deg;</td>'+
-    '<td class="co">'+c.lo.toFixed(2)+'&deg;</td>'+
-    '</tr>'
+    '<tr id="r'+c.i+'" onclick="selectColor('+c.i+',true)"'+(c.i===selIdx?' class="sel"':'')+'>'+vc.map(col=>CELL[col.k](c)).join('')+'</tr>'
   ).join('');
   // footer bar stats
   const cats={};COLORS.forEach(c=>{cats[c.cat]=(cats[c.cat]||0)+1;});
   document.getElementById('fbStats').innerHTML=
-    '<span class="fb-stat"><b>'+COLORS.length+'</b> colours</span>'+
+    '<span class="fb-stat"><b>'+nGeo+'</b> colours</span>'+
     '<span class="fb-sep"></span>'+
     '<span class="fb-stat"><b>'+(cats.city||0)+'</b> cities</span>'+
     '<span class="fb-stat"><b>'+(cats.region||0)+'</b> regions</span>'+
@@ -940,8 +1078,8 @@ function sortPalette(key){
   renderPalette();
 }
 
-function removeFromPalette(hex){
-  palette=palette.filter(p=>p.hex!==hex);
+function removeFromPalette(idx){
+  palette=palette.filter(p=>p.i!==idx);
   renderPalette();
   if(selIdx>=0)updateInfoCtrl(COLORS[selIdx]);
 }
@@ -963,7 +1101,7 @@ function openTineye(){
 function addToPalette(idx,e){
   if(e)e.stopPropagation();
   const c=COLORS[idx];
-  if(palette.find(p=>p.hex===c.hex))return;
+  if(palette.some(p=>p.i===idx))return;
   const r=parseInt(c.hex.slice(1,3),16),g=parseInt(c.hex.slice(3,5),16),b=parseInt(c.hex.slice(5,7),16);
   const lum=Math.round((0.299*r+0.587*g+0.114*b)/255*100);
   palette.push({hex:c.hex,n:c.n,h:c.h,s:c.s,v:c.v,r,g,b,lum,i:idx});
@@ -981,7 +1119,7 @@ function exportPaletteCSV(){
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='geographic-palette-'+palette.length+'colours'+(palSortKey?'-by-'+palSortKey:'')+'.csv';
-  a.click();URL.revokeObjectURL(a.href);
+  a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
 }
 
 function downloadPNG(){
@@ -1016,7 +1154,7 @@ function downloadPNG(){
   canvas.toBlob(blob=>{
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);
     a.download='geographic-palette-'+n+'colours'+(palSortKey?'-by-'+palSortKey:'')+'.png';
-    a.click();URL.revokeObjectURL(a.href);
+    a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
   });
 }
 
@@ -1069,7 +1207,7 @@ function renderPalette(){
     const rm=document.createElement('button');
     rm.style.cssText='position:absolute;top:-5px;right:-5px;width:14px;height:14px;border-radius:50%;background:var(--rust);color:#fff;font-size:8px;line-height:14px;text-align:center;cursor:pointer;border:none;padding:0;display:none';
     rm.textContent='×';rm.title='Remove';
-    rm.onclick=e=>{e.stopPropagation();removeFromPalette(p.hex);};
+    rm.onclick=e=>{e.stopPropagation();removeFromPalette(p.i);};
     chip.appendChild(rm);
 
     wrap.addEventListener('mouseenter',()=>rm.style.display='block');
@@ -1175,7 +1313,7 @@ function exportRampCSV(){
   });
   const csv=[hdr,...rows].map(r=>r.join(',')).join('\r\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download='colour-ramp-'+ramp.length+'steps.csv';a.click();URL.revokeObjectURL(a.href);
+  a.download='colour-ramp-'+ramp.length+'steps.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
 }
 function downloadRampPNG(){
   if(palette.length<2)return;
@@ -1192,7 +1330,7 @@ function downloadRampPNG(){
   });
   canvas.toBlob(blob=>{
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-    a.download='colour-ramp-'+n+'steps.png';a.click();URL.revokeObjectURL(a.href);
+    a.download='colour-ramp-'+n+'steps.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
   });
 }
 function exportRampQGIS(){
@@ -1201,9 +1339,11 @@ function exportRampQGIS(){
   const rgba=h=>parseInt(h.slice(1,3),16)+','+parseInt(h.slice(3,5),16)+','+parseInt(h.slice(5,7),16)+',255';
   const n=ramp.length;
   const stops=ramp.slice(1,-1).map((h,i)=>((i+1)/(n-1)).toFixed(6)+';'+rgba(h)).join(':');
-  const xml='<!DOCTYPE qgis-color-scheme>\n<colorramp name="geographic-ramp" type="gradient">\n  <prop k="color1" v="'+rgba(ramp[0])+'"/>\n  <prop k="color2" v="'+rgba(ramp[n-1])+'"/>\n  <prop k="discrete" v="0"/>\n  <prop k="rampType" v="gradient"/>\n  <prop k="stops" v="'+stops+'"/>\n</colorramp>';
+  const nm='earth-colours-ramp-'+n;
+  /* QGIS Style Manager format: Style Manager > Import/Export > Import Item(s) */
+  const xml='<!DOCTYPE qgis_style>\n<qgis_style version="2">\n  <symbols/>\n  <colorramps>\n    <colorramp type="gradient" name="'+nm+'">\n      <prop k="color1" v="'+rgba(ramp[0])+'"/>\n      <prop k="color2" v="'+rgba(ramp[n-1])+'"/>\n      <prop k="discrete" v="0"/>\n      <prop k="rampType" v="gradient"/>\n      <prop k="stops" v="'+stops+'"/>\n    </colorramp>\n  </colorramps>\n</qgis_style>\n';
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([xml],{type:'text/xml'}));
-  a.download='colour-ramp.xml';a.click();URL.revokeObjectURL(a.href);
+  a.download='colour-ramp-'+n+'steps-qgis.xml';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
 }
 function exportRampCSS(){
   if(palette.length<2)return;
@@ -1211,7 +1351,7 @@ function exportRampCSS(){
   const stops=ramp.map((h,i)=>h+' '+(i/(ramp.length-1)*100).toFixed(1)+'%').join(', ');
   const css='/* Geographic colour ramp \u2014 LAB interpolated */\n.my-gradient {\n  background: linear-gradient(to right, '+stops+');\n}';
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([css],{type:'text/css'}));
-  a.download='colour-ramp.css';a.click();URL.revokeObjectURL(a.href);
+  a.download='colour-ramp.css';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
 }
 /* ── TOOLTIP ── */
 (function(){
@@ -1246,9 +1386,85 @@ function exportRampCSS(){
   document.addEventListener('click',()=>{tt.style.opacity='0';});
 })();
 
+/* ── DROPDOWN MENUS ── */
+function toggleDD(id,e){if(e)e.stopPropagation();const d=document.getElementById(id);const o=!d.classList.contains('open');closeDD();if(o)d.classList.add('open');}
+function closeDD(){document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));}
+document.addEventListener('click',e=>{if(!e.target.closest('.dd'))closeDD();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDD();});
+
+/* ── PRINT: table shows every column; map mode prints map + legend ── */
+function printTable(){document.body.classList.remove('print-map');window.print();}
+window.addEventListener('beforeprint',()=>{if(!document.body.classList.contains('print-map')){forceAllCols=true;buildHead();go();}});
+window.addEventListener('afterprint',()=>{
+  document.body.classList.remove('print-map');
+  if(forceAllCols){forceAllCols=false;buildHead();go();}
+});
+function mapColours(){
+  const b=map.getBounds();
+  return filtered().filter(c=>c.cat!=='egg'&&map.hasLayer(markers[c.i])&&b.contains(markers[c.i].getLatLng()));
+}
+function exportMapPDF(){
+  const pane=document.getElementById('mapPane').getBoundingClientRect();
+  /* keep the map at its on-screen pixel size (so tiles stay aligned) and scale it to fit A4 landscape */
+  const s=Math.min(1,1000/pane.width,560/pane.height);
+  const st=document.body.style;
+  st.setProperty('--pm-w',pane.width+'px');st.setProperty('--pm-h',pane.height+'px');st.setProperty('--pm-s',s);
+  const vis=mapColours();
+  const filt=[cat?BN[cat]:'',document.getElementById('srch').value?'search “'+document.getElementById('srch').value+'”':''].filter(Boolean).join(', ');
+  document.getElementById('pmSheet').innerHTML=
+    '<div class="pm-legend">'+vis.map(c=>'<div class="pm-item"><span class="pm-sw" style="background:'+c.hex+'"></span><span>'+esc(c.n)+' <span class="pm-hex">'+c.hex+'</span></span></div>').join('')+'</div>'+
+    '<div class="pm-foot">'+vis.length+' colours in view'+(filt?' ('+esc(filt)+')':'')+' &middot; Basemap: '+esc(BASEMAPS[curBase].label)+' &middot; Earth Colours, Jonathan Cinnamon &middot; '+location.href.split('#')[0]+' &middot; '+new Date().toISOString().slice(0,10)+'</div>';
+  document.body.classList.add('print-map');
+  closeDD();
+  setTimeout(()=>window.print(),150);
+}
+function tileSpec(layer){
+  const out=[];
+  const add=l=>{if(l.options&&l.options.style&&!l._url){out.push({gl:l.options.style,attribution:l.options.attribution||''});}
+    else if(l instanceof L.TileLayer){const o=l.options;out.push({u:l._url,o:{maxZoom:o.maxZoom,subdomains:o.subdomains,attribution:o.attribution||'',className:o.className||''}});}
+    else if(l.getLayers)l.getLayers().forEach(add);};
+  add(layer);return out;
+}
+function exportMapHTML(){
+  const z=map.getZoom(),ctr=map.getCenter();
+  const fd=filtered().filter(c=>c.cat!=='egg');
+  const data=fd.map(c=>{const ll=jitteredLatLng(c,z);return[c.n,c.hex,c.pl,c.cx,BN[c.cat],+ll[0].toFixed(4),+ll[1].toFixed(4),c.wp||''];});
+  const J=o=>JSON.stringify(o).replace(/</g,'\\u003c');
+  const filt=[cat?BN[cat]:'',document.getElementById('srch').value].filter(Boolean).join(' · ');
+  const SC='scr'+'ipt';
+  const spec=tileSpec(BASEMAPS[curBase].layer),gl=spec.some(t=>t.gl);
+  const html='<!DOCTYPE html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'+
+    '<title>Earth Colours map</title>'+
+    '<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">'+
+    (gl?'<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.6.1/maplibre-gl.css">':'')+
+    '<style>html,body,#m{height:100%;margin:0}body{font-family:Georgia,serif}'+
+    '.ttl{background:#fff;padding:6px 10px;border-radius:4px;border:1px solid #bbb;font-size:13px;line-height:1.35}.ttl b{font-size:15px;font-weight:normal}.ttl small{color:#777}'+
+    '.p{display:flex;gap:8px;align-items:flex-start}.p i{width:34px;height:34px;border-radius:3px;border:1px solid rgba(0,0,0,.2);flex-shrink:0}.p b{font-size:14px}.p small{color:#777;font-family:monospace}</style></head><body><div id="m"></div>'+
+    '<'+SC+' src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></'+SC+'>'+
+    (gl?'<'+SC+' src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.6.1/maplibre-gl.min.js"></'+SC+'><'+SC+' src="https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.1.3/leaflet-maplibre-gl.js"></'+SC+'>':'')+
+    '<'+SC+'>'+
+    'const D='+J(data)+',T='+J(spec)+';'+
+    'function e(t){return String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",\'"\':"&quot;"}[c]))}'+
+    'const m=L.map("m",{preferCanvas:true}).setView(['+ctr.lat.toFixed(4)+','+ctr.lng.toFixed(4)+'],'+z+');'+
+    'T.forEach(t=>t.gl?L.maplibreGL({style:t.gl,attribution:t.attribution,interactive:false}).addTo(m):L.tileLayer(t.u,t.o).addTo(m));'+
+    'D.forEach(d=>L.circleMarker([d[5],d[6]],{radius:7,fillColor:d[1],color:"#fff",weight:1.5,fillOpacity:.92}).bindTooltip(e(d[0])).bindPopup(\'<div class="p"><i style="background:\'+d[1]+\'"></i><div><b>\'+e(d[0])+\'</b><br>\'+e(d[2])+(d[3]?", "+e(d[3]):"")+\'<br><small>\'+d[1]+" · "+e(d[4])+\'</small>\'+(d[7]?\'<br><a href="\'+e(d[7])+\'" target="_blank" rel="noopener">Wikipedia</a>\':"")+\'</div></div>\').addTo(m));'+
+    'const c=L.control({position:"topright"});c.onAdd=()=>{const d=L.DomUtil.create("div","ttl");d.innerHTML=\'<b>Earth Colours</b><br>\'+D.length+\' colours'+(filt?' · '+esc(filt).replace(/'/g,'&#39;'):'')+'<br><small>From <a href="'+location.href.split('#')[0]+'">Earth Colours</a> by Jonathan Cinnamon</small>\';return d};c.addTo(m);'+
+    '</'+SC+'></body></html>';
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='earth-colours-map'+(cat?'-'+cat:'')+'.html';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+
+/* ── REDRAW RAMP ON RESIZE ── */
+let rampResizeT;
+window.addEventListener('resize',()=>{clearTimeout(rampResizeT);rampResizeT=setTimeout(updateRamp,150);});
+
 /* ── INIT ── */
 try{if(localStorage.getItem('gc-theme')==='dark')toggleTheme();}catch(e){}
-go();
+fitCols();
+if(window.ResizeObserver){let rq;new ResizeObserver(()=>{cancelAnimationFrame(rq);rq=requestAnimationFrame(fitCols);}).observe(document.getElementById('tpane'));}
+else window.addEventListener('resize',fitCols);
 /* ── ENSURE MAP FILLS CONTAINER ON LOAD ── */
 window.addEventListener('load',()=>{
   map.invalidateSize();
