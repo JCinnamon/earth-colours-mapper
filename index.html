@@ -57,8 +57,8 @@ header h1{font-family:'IM Fell English SC',serif;font-size:20px;font-weight:400;
 .sort-sel{font-family:'Crimson Pro',serif;font-size:13px;color:var(--ink-mid);background:var(--surface);border:.5px solid var(--border-strong);border-radius:3px;padding:2px 4px;cursor:pointer;flex-shrink:0}
 .sort-dir{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-mid);background:none;border:.5px solid var(--border-strong);border-radius:3px;width:24px;height:22px;cursor:pointer;flex-shrink:0;padding:0}
 .sort-dir:hover,.sort-sel:hover{color:var(--rust);border-color:var(--rust)}
-/* print-map legend (hidden on screen) */
-.pm-sheet{display:none}
+/* busy cursor while a PDF is built */
+body.busy,body.busy *{cursor:progress!important}
 .btn{background:none;border:.5px solid var(--border-strong);border-radius:4px;color:var(--ink-mid);cursor:pointer;font-size:13px;padding:4px 9px;font-family:'Crimson Pro',serif;transition:all .12s;white-space:nowrap}
 .btn:hover{color:var(--rust);border-color:var(--rust)}
 .btn.active{background:var(--rust);color:#fff;border-color:var(--rust)}
@@ -266,31 +266,18 @@ tbody tr:hover .add-pal{display:inline-block}
   header{position:static;border-bottom:1pt solid #555;height:auto;padding:6pt 0}
   .main{display:block;height:auto}
   .tpane{overflow:visible;height:auto;min-height:0}
-  table{font-size:7.5pt;page-break-inside:auto}
+  table{font-size:8.5pt;page-break-inside:auto;color:#111}
   tr{page-break-inside:avoid}
   thead{display:table-header-group}
-  th{background:#f0f0f0!important;color:#444!important;border-bottom:.5pt solid #999!important;font-size:7pt!important}
+  th{background:#efe9dd!important;color:#111!important;font-style:normal!important;font-weight:600!important;border-bottom:.5pt solid #777!important;font-size:8pt!important}
   tbody tr{border-bottom:.25pt solid #ccc!important}
   tbody tr:hover,tbody tr.sel{background:transparent!important;border-left:none!important}
   .sw,.bf,.hd,.badge{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .badge{background:#eee!important;color:#333!important;border:.25pt solid #aaa!important}
-  .hx,.cx,.co,.nm{color:#555!important}
+  .hx,.cx,.co,.nm,.ll{color:#333!important}
+  .cn,.pl{color:#111!important}
   @page{margin:1.4cm;size:A4 landscape}
-  /* ── map PDF mode ── */
-  body.print-map header,body.print-map .tpane,body.print-map .credits-drawer{display:none!important}
-  body.print-map .main{display:block!important}
-  body.print-map .map-pane{display:block!important;width:var(--pm-w)!important;height:var(--pm-h)!important;max-width:none!important;transform:scale(var(--pm-s));transform-origin:top left;margin-bottom:calc(var(--pm-h) * (var(--pm-s) - 1));border:.5pt solid #999;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  body.print-map #map,body.print-map .map-pane *{overflow:hidden!important}
-  body.print-map .leaflet-control-zoom,body.print-map .leaflet-control-layers,body.print-map .map-info{display:none!important}
-  body.print-map .pm-sheet{display:block;font-family:Georgia,serif;color:#222}
-  .pm-head{margin:0 0 6pt}
-  .pm-title{font-size:13pt}
-  .pm-sub{font-size:8pt;color:#666}
-  .pm-legend{margin-top:8pt;columns:4;column-gap:12pt;font-size:7pt;line-height:1.35}
-  .pm-item{break-inside:avoid;display:flex;align-items:center;gap:4pt}
-  .pm-sw{width:8pt;height:8pt;border:.25pt solid #999;flex-shrink:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .pm-hex{color:#888;font-family:monospace}
-  .pm-foot{margin-top:8pt;font-size:6.5pt;color:#888}
+
 }
 </style>
 </head>
@@ -312,10 +299,10 @@ tbody tr:hover .add-pal{display:inline-block}
       <button class="btn" onclick="toggleDD('dlDD',event)">&#x2193; Download &#x25BE;</button>
       <div class="dd-menu">
         <button onclick="closeDD();exportCSV()">Table &mdash; CSV<span class="dd-sub">Filtered rows, all columns</span></button>
-        <button onclick="closeDD();printTable()">Table &mdash; print / PDF<span class="dd-sub">Opens the print dialog</span></button>
+        <button onclick="closeDD();exportTablePDF()">Table &mdash; PDF<span class="dd-sub">Filtered rows, current sort</span></button>
         <div class="dd-sep"></div>
         <button onclick="closeDD();exportMapHTML()">Map &mdash; interactive HTML<span class="dd-sub">Filtered colours, current view and basemap</span></button>
-        <button onclick="closeDD();exportMapPDF()">Map &mdash; PDF<span class="dd-sub">Current view + legend; choose &lsquo;Save as PDF&rsquo;</span></button>
+        <button onclick="closeDD();exportMapPDF()">Map &mdash; PDF<span class="dd-sub">Current view on page 1, its legend after</span></button>
       </div>
     </div>
     <button class="btn" onclick="toggleTheme()" id="themeBtn">&#x25D1; Dark</button>
@@ -364,7 +351,7 @@ tbody tr:hover .add-pal{display:inline-block}
     </div>
     <div>
       <div class="hi-title">Map &amp; downloads</div>
-      <p class="hi-text">Switch basemap with the layers button on the map. <strong>Download</strong> saves the table (CSV or print) or the map (interactive HTML or PDF) for the current filter.</p>
+      <p class="hi-text">Switch basemap with the layers button on the map. <strong>Download</strong> saves the table (CSV or PDF) or the map (interactive HTML, or a PDF of the current view with its legend).</p>
     </div>
     <div>
       <div class="hi-title">Palette &amp; ramp</div>
@@ -447,8 +434,6 @@ tbody tr:hover .add-pal{display:inline-block}
   </div>
 </div>
 
-<!-- MAP PDF SHEET (print only) -->
-<div class="pm-sheet" id="pmSheet"></div>
 
 <!-- SLIM FOOTER BAR -->
 <div class="footer-bar">
@@ -820,10 +805,10 @@ const map=L.map('map',{zoomControl:true,preferCanvas:true}).setView([20,10],2);
 const OSM_ATTR='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 const OFM_ATTR=OSM_ATTR+' &middot; &copy; <a href="https://openmaptiles.org">OpenMapTiles</a> &middot; <a href="https://openfreemap.org">OpenFreeMap</a>';
 const ESRI='https://server.arcgisonline.com/ArcGIS/rest/services/';
-function esri(path,o){return L.tileLayer(ESRI+path+'/MapServer/tile/{z}/{y}/{x}',o);}
+function esri(path,o){return L.tileLayer(ESRI+path+'/MapServer/tile/{z}/{y}/{x}',Object.assign({crossOrigin:'anonymous'},o));}
 const ESRI_CANVAS_ATTR='Tiles &copy; <a href="https://www.esri.com">Esri</a> &mdash; Esri, HERE, Garmin, '+OSM_ATTR;
 /* preserveDrawingBuffer at the top level so the GL canvas prints (Map PDF) */
-function ofm(style){return L.maplibreGL({style:'https://tiles.openfreemap.org/styles/'+style,attribution:OFM_ATTR,interactive:false,preserveDrawingBuffer:true});}
+function ofm(style){return L.maplibreGL({style:'https://tiles.openfreemap.org/styles/'+style,attribution:OFM_ATTR,interactive:false,preserveDrawingBuffer:true,canvasContextAttributes:{preserveDrawingBuffer:true,antialias:true}});}
 const HAS_GL=!!(window.L&&L.maplibreGL&&window.maplibregl);
 const BASEMAPS=HAS_GL?{
   'ofm-positron':{label:'Positron (light)',layer:ofm('positron')},
@@ -837,7 +822,7 @@ const BASEMAPS=HAS_GL?{
 BASEMAPS['esri-imagery']={label:'Satellite (Esri)',layer:L.layerGroup([
   esri('World_Imagery',{maxZoom:19,attribution:'Imagery &copy; <a href="https://www.esri.com">Esri</a> &mdash; Esri, Maxar, Earthstar Geographics, and the GIS User Community'}),
   esri('Reference/World_Boundaries_and_Places',{maxZoom:19})])};
-BASEMAPS['topo']={label:'Topographic (OpenTopoMap)',layer:L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:17,subdomains:'abc',attribution:'Map data: '+OSM_ATTR+', SRTM &middot; Style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)'})};
+BASEMAPS['topo']={label:'Topographic (OpenTopoMap)',layer:L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{crossOrigin:'anonymous',maxZoom:17,subdomains:'abc',attribution:'Map data: '+OSM_ATTR+', SRTM &middot; Style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)'})};
 const BASE_DEFAULT={light:'ofm-positron',dark:'ofm-dark'};
 function basemapFor(dark){
   const t=dark?'dark':'light';
@@ -1392,31 +1377,135 @@ function closeDD(){document.querySelectorAll('.dd.open').forEach(d=>d.classList.
 document.addEventListener('click',e=>{if(!e.target.closest('.dd'))closeDD();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDD();});
 
-/* ── PRINT: table shows every column; map mode prints map + legend ── */
-function printTable(){document.body.classList.remove('print-map');window.print();}
-window.addEventListener('beforeprint',()=>{if(!document.body.classList.contains('print-map')){forceAllCols=true;buildHead();go();}});
-window.addEventListener('afterprint',()=>{
-  document.body.classList.remove('print-map');
-  if(forceAllCols){forceAllCols=false;buildHead();go();}
-});
+/* ── BROWSER PRINT (Ctrl+P): table shows every column ── */
+window.addEventListener('beforeprint',()=>{forceAllCols=true;buildHead();go();});
+window.addEventListener('afterprint',()=>{if(forceAllCols){forceAllCols=false;buildHead();go();}});
+
+/* ── PDF EXPORTS (jsPDF, loaded on first use) ──
+   The map is rasterised into one image (basemap + markers) rather than printed,
+   because browsers print WebGL canvases blank. */
+const PDF_LIBS=['https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js'];
+let pdfReady=null;
+function loadScript(u){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=u;s.onload=ok;s.onerror=()=>no(new Error('Could not load '+u));document.head.appendChild(s);});}
+function loadPDF(){if(!pdfReady)pdfReady=PDF_LIBS.reduce((p,u)=>p.then(()=>loadScript(u)),Promise.resolve()).catch(e=>{pdfReady=null;throw e;});return pdfReady;}
+function busy(on){document.body.classList.toggle('busy',on);}
+function hexRGB(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+function stripTags(h){const d=document.createElement('div');d.innerHTML=h||'';return d.textContent.replace(/\s+/g,' ').trim();}
+function filterLabel(){const q=document.getElementById('srch').value.trim();return[cat?BN[cat]:'All types',q?'search “'+q+'”':''].filter(Boolean).join(', ');}
+function today(){return new Date().toISOString().slice(0,10);}
+const SITE_URL=location.href.split('#')[0].split('?')[0];
+const SORT_LABEL={h:'hue',s:'saturation',v:'brightness',lum:'luminance',la:'latitude',lo:'longitude',n:'name',pl:'place',cat:'type',hex:'hex'};
+function pdfFooter(doc,W,H){
+  const n=doc.getNumberOfPages();
+  for(let p=1;p<=n;p++){doc.setPage(p);doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(120);
+    doc.text('Earth Colours · Jonathan Cinnamon · '+SITE_URL,12,H-6);doc.text(p+' / '+n,W-12,H-6,{align:'right'});}
+}
+/* colours whose markers are inside the current map view (and pass the filter) */
 function mapColours(){
   const b=map.getBounds();
   return filtered().filter(c=>c.cat!=='egg'&&map.hasLayer(markers[c.i])&&b.contains(markers[c.i].getLatLng()));
 }
-function exportMapPDF(){
-  const pane=document.getElementById('mapPane').getBoundingClientRect();
-  /* keep the map at its on-screen pixel size (so tiles stay aligned) and scale it to fit A4 landscape */
-  const s=Math.min(1,1000/pane.width,560/pane.height);
-  const st=document.body.style;
-  st.setProperty('--pm-w',pane.width+'px');st.setProperty('--pm-h',pane.height+'px');st.setProperty('--pm-s',s);
-  const vis=mapColours();
-  const filt=[cat?BN[cat]:'',document.getElementById('srch').value?'search “'+document.getElementById('srch').value+'”':''].filter(Boolean).join(', ');
-  document.getElementById('pmSheet').innerHTML=
-    '<div class="pm-legend">'+vis.map(c=>'<div class="pm-item"><span class="pm-sw" style="background:'+c.hex+'"></span><span>'+esc(c.n)+' <span class="pm-hex">'+c.hex+'</span></span></div>').join('')+'</div>'+
-    '<div class="pm-foot">'+vis.length+' colours in view'+(filt?' ('+esc(filt)+')':'')+' &middot; Basemap: '+esc(BASEMAPS[curBase].label)+' &middot; Earth Colours, Jonathan Cinnamon &middot; '+location.href.split('#')[0]+' &middot; '+new Date().toISOString().slice(0,10)+'</div>';
-  document.body.classList.add('print-map');
-  closeDD();
-  setTimeout(()=>window.print(),150);
+/* draw everything under the map container that is a <canvas> or loaded tile <img> */
+function waitGL(){
+  const lyr=BASEMAPS[curBase].layer, gl=lyr.getMaplibreMap?lyr.getMaplibreMap():null;
+  if(!gl)return Promise.resolve();
+  return new Promise(ok=>{if(gl.loaded()&&gl.areTilesLoaded&&gl.areTilesLoaded()){gl.triggerRepaint();gl.once('render',()=>ok());setTimeout(ok,800);}
+    else{gl.once('idle',()=>ok());setTimeout(ok,4000);}});
+}
+async function snapshotMap(scale){
+  await waitGL();
+  const box=map.getContainer().getBoundingClientRect();
+  const cv=document.createElement('canvas');cv.width=Math.round(box.width*scale);cv.height=Math.round(box.height*scale);
+  const ctx=cv.getContext('2d');ctx.scale(scale,scale);
+  ctx.fillStyle=isDark?'#1d1a16':'#f2efe9';ctx.fillRect(0,0,box.width,box.height);
+  let tainted=false;
+  const draw=el=>{const r=el.getBoundingClientRect();if(!r.width||!r.height)return;
+    try{ctx.drawImage(el,r.left-box.left,r.top-box.top,r.width,r.height);}catch(e){tainted=true;}};
+  /* basemap: GL canvas and/or raster tiles, in DOM order */
+  map.getPanes().tilePane.querySelectorAll('canvas, img.leaflet-tile-loaded').forEach(draw);
+  map.getContainer().querySelectorAll('.leaflet-gl-layer canvas, .maplibregl-canvas').forEach(el=>{if(!map.getPanes().tilePane.contains(el))draw(el);});
+  try{cv.toDataURL();}catch(e){ /* a cross-origin tile slipped in: redraw without basemap */
+    tainted=true;ctx.setTransform(1,0,0,1,0,0);ctx.scale(scale,scale);ctx.fillStyle='#f2efe9';ctx.fillRect(0,0,box.width,box.height);}
+  /* markers (Leaflet canvas renderer) */
+  map.getPanes().overlayPane.querySelectorAll('canvas').forEach(draw);
+  return{url:cv.toDataURL('image/jpeg',0.92),w:box.width,h:box.height,tainted};
+}
+async function exportMapPDF(){
+  busy(true);
+  try{
+    await loadPDF();
+    const snap=await snapshotMap(2.5);
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+    const W=297,H=210,M=12;
+    const vis=mapColours();
+    /* ── page 1: map ── */
+    doc.setFont('times','normal');doc.setFontSize(17);doc.setTextColor(28,20,10);doc.text('Earth Colours',M,M+5);
+    doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(90,72,48);
+    doc.text(vis.length+' colours in view · '+filterLabel()+' · Basemap: '+BASEMAPS[curBase].label+' · '+today(),M,M+10.5);
+    const top=M+14,boxW=W-2*M,boxH=H-top-20;
+    const k=Math.min(boxW/snap.w,boxH/snap.h),iw=snap.w*k,ih=snap.h*k,ix=M+(boxW-iw)/2,iy=top;
+    doc.addImage(snap.url,'JPEG',ix,iy,iw,ih);
+    doc.setDrawColor(150);doc.setLineWidth(0.2);doc.rect(ix,iy,iw,ih);
+    doc.setFontSize(6.5);doc.setTextColor(110);
+    const attr=stripTags(map.attributionControl?map.attributionControl._container.innerHTML:'');
+    doc.text(doc.splitTextToSize(attr+(snap.tainted?' (basemap could not be captured)':''),iw),ix,iy+ih+4);
+    /* ── page 2+: legend, items never split ── */
+    const COLS_N=4,colW=(W-2*M)/COLS_N,rowH=9.5,lTop=M+14,rowsPer=Math.floor((H-lTop-14)/rowH),perPage=COLS_N*rowsPer;
+    const pages=Math.max(1,Math.ceil(vis.length/perPage));
+    for(let pg=0;pg<pages;pg++){
+      doc.addPage();
+      doc.setFont('times','normal');doc.setFontSize(14);doc.setTextColor(28,20,10);
+      doc.text('Legend — colours in this map view'+(pages>1?' ('+(pg+1)+'/'+pages+')':''),M,M+5);
+      doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(90,72,48);
+      doc.text(vis.length+' colours · '+filterLabel()+' · ordered by '+SORT_LABEL[srtK],M,M+10);
+      if(!vis.length){doc.setFontSize(10);doc.setTextColor(60);doc.text('No colours are visible in this view.',M,lTop+6);}
+      vis.slice(pg*perPage,(pg+1)*perPage).forEach((c,j)=>{
+        const col=Math.floor(j/rowsPer),row=j%rowsPer,x=M+col*colW,y=lTop+row*rowH;
+        doc.setFillColor(...hexRGB(c.hex));doc.setDrawColor(160);doc.setLineWidth(0.15);doc.rect(x,y,6.5,6.5,'FD');
+        doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(28,20,10);
+        doc.text(doc.splitTextToSize(c.n,colW-26)[0],x+8.5,y+2.8);
+        doc.setFont('courier','normal');doc.setFontSize(7);doc.setTextColor(90);doc.text(c.hex,x+colW-4,y+2.8,{align:'right'});
+        doc.setFont('helvetica','normal');doc.setFontSize(6.8);doc.setTextColor(100);
+        doc.text(doc.splitTextToSize(c.pl+' ('+fmtLL(c)+')',colW-12)[0],x+8.5,y+6.1);
+      });
+    }
+    pdfFooter(doc,W,H);
+    doc.save('earth-colours-map'+(cat?'-'+cat:'')+'-'+today()+'.pdf');
+  }catch(e){console.error(e);alert('Sorry — the map PDF could not be created ('+e.message+').');}
+  finally{busy(false);}
+}
+async function exportTablePDF(){
+  busy(true);
+  try{
+    await loadPDF();
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+    const W=297,H=210,M=12;
+    const fd=filtered().filter(c=>c.cat!=='egg');
+    doc.setFont('times','normal');doc.setFontSize(17);doc.setTextColor(28,20,10);doc.text('Earth Colours',M,M+5);
+    doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(90,72,48);
+    doc.text(fd.length+' colours · '+filterLabel()+' · sorted by '+SORT_LABEL[srtK]+(srtD>0?' (ascending)':' (descending)')+' · '+today(),M,M+10.5);
+    doc.autoTable({
+      startY:M+15,margin:{left:M,right:M,bottom:14},
+      head:[['','Colour','Place','Coordinates','Context','Type','Hex','H°','S%','V%','Lum%']],
+      body:fd.map(c=>['',c.n,c.pl,fmtLL(c),c.cx,BN[c.cat],c.hex,c.h,c.s,c.v,c.lum]),
+      theme:'plain',
+      styles:{font:'helvetica',fontSize:8.5,textColor:[28,20,10],cellPadding:{top:1.6,bottom:1.6,left:2,right:2},valign:'middle',lineColor:[220,212,198],lineWidth:{bottom:0.15}},
+      headStyles:{fontStyle:'bold',fillColor:[239,233,221],textColor:[28,20,10],lineWidth:{bottom:0.4},lineColor:[120,100,70]},
+      alternateRowStyles:{fillColor:[250,248,243]},
+      columnStyles:{0:{cellWidth:9},1:{cellWidth:44,fontStyle:'bold'},2:{cellWidth:40},3:{cellWidth:30,font:'courier',fontSize:7.8},4:{cellWidth:32},5:{cellWidth:38},
+        6:{cellWidth:19,font:'courier',fontSize:7.8},7:{halign:'right'},8:{halign:'right'},9:{halign:'right'},10:{halign:'right'}},
+      didParseCell:d=>{if(d.section==='head'&&d.column.index>=7)d.cell.styles.halign='right';},
+      didDrawCell:d=>{if(d.section==='body'&&d.column.index===0){const c=fd[d.row.index];
+        doc.setFillColor(...hexRGB(c.hex));doc.setDrawColor(150);doc.setLineWidth(0.15);
+        const sz=Math.min(5.5,d.cell.height-1.5);doc.rect(d.cell.x+1.6,d.cell.y+(d.cell.height-sz)/2,sz,sz,'FD');}}
+    });
+    pdfFooter(doc,W,H);
+    doc.save('earth-colours-table'+(cat?'-'+cat:'')+'-'+today()+'.pdf');
+  }catch(e){console.error(e);alert('Sorry — the table PDF could not be created ('+e.message+').');}
+  finally{busy(false);}
 }
 function tileSpec(layer){
   const out=[];
